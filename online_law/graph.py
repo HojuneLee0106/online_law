@@ -30,7 +30,7 @@ SYSTEM_PROMPT = (
 def build_llm():
     provider=os.getenv("LLM_PROVIDER", "anthropic").lower()
     print(f"LLM Provider:{provider}")
-    if provider == "antropic":
+    if provider == "anthropic":
         return ChatAnthropic(
             model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -48,17 +48,8 @@ def format_docs(docs: list[Document])->str:
         parts.append(f"[출처: {source}]\n{doc.page_content}")
     return "\n\n".join(parts)
 
-def build_retrievers(vectorstore):
-    law_retriever=vectorstore.as_retriever(
-        search_kwargs={"k":3,"filter":{"doc_type":"law"}}
-    )
-    case_retriever=vectorstore.as_retriever(
-        search_kwargs={"k":3,"filter":{"doc_type":"case"}}
-    )
-    return law_retriever, case_retriever
 
 def build_tools(vectorstore):
-    law_retriever, case_retriever=build_retrievers(vectorstore)
     @tool
     def search_law(query: str)->str:
         """법조문(법률 조항)을 검색합니다. 특정 법률의 조문 내용이나 정의가 필요할 때 사용하세요."""
@@ -79,11 +70,13 @@ def build_tools(vectorstore):
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
-def build_rag_graph():
+
+def build_rag_graph(use_api_law: bool=False):
     vectorstore=build_vectorstore()
     tools=build_tools(vectorstore)
     raw_llm=build_llm()
-    llm=build_llm().bind_tools(tools)
+    llm=raw_llm.bind_tools(tools)
+    
     def summarize_messages(state: State):
         messages=state["messages"]
         if len(messages)>20:

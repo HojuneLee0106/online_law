@@ -1,0 +1,10 @@
+.venv/
+.git/
+__pycache__/
+*.pyc
+checkpoints.db
+checkpoints.db-shm
+checkpoints.db-wal
+.env
+chroma_persist_manifest.json
+data/

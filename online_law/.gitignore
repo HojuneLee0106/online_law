@@ -1,6 +1,5 @@
 .venv/
 .env
-chroma_persist/
 chroma_persist_manifest.json
 __pycache__/
 *.pyc
