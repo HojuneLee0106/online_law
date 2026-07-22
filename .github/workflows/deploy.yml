@@ -28,7 +28,7 @@ jobs:
         with:
           context: ./online_law  
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/hojunelee0106/online_law:latest
 
   deploy:
     needs: build-and-push
@@ -42,7 +42,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/${{ github.repository }}:latest
+            docker pull ghcr.io/hojunelee0106/online_law:latest
             docker stop online-law || true
             docker rm online-law || true
             docker run -d --name online-law \
@@ -50,4 +50,4 @@ jobs:
               -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
               -e LLM_PROVIDER="anthropic" \
               -e PASSCODE="${{ secrets.PASSCODE }}" \
-              ghcr.io/${{ github.repository }}:latest
+              ghcr.io/hojunelee0106/online_law:latest
