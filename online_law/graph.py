@@ -32,7 +32,7 @@ def build_llm():
     print(f"LLM Provider:{provider}")
     if provider == "anthropic":
         return ChatAnthropic(
-            model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
+            model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
         )
     else:
