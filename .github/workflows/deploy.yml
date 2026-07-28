@@ -46,8 +46,12 @@ jobs:
             docker stop online-law || true
             docker rm online-law || true
             docker run -d --name online-law \
+              --restart unless-stopped \
               -p 8000:8000 \
+              -v /home/ubuntu/chroma_data/chroma_persist:/app/chroma_persist \
+              -v /home/ubuntu/chroma_data/chroma_qa:/app/chroma_qa \
               -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
+              -e ANTHROPIC_MODEL="claude-sonnet-4-6" \
               -e LLM_PROVIDER="anthropic" \
               -e PASSCODE="${{ secrets.PASSCODE }}" \
               ghcr.io/hojunelee0106/online_law:latest

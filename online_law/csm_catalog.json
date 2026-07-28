@@ -1,0 +1,1689 @@
+
+[
+  {
+    "csmSeq": 707,
+    "title": "가족관계 등록",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 1894,
+    "title": "결혼준비자",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 2585,
+    "title": "보호출산",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 255,
+    "title": "상속",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 1659,
+    "title": "양육비",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 234,
+    "title": "유언",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 233,
+    "title": "이혼",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 2584,
+    "title": "입양",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 1811,
+    "title": "장례ㆍ장사",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 241,
+    "title": "재혼",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 1830,
+    "title": "태아 및 신생아",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 694,
+    "title": "후견제도",
+    "categorySeq": 1,
+    "category": "가정법률"
+  },
+  {
+    "csmSeq": 1891,
+    "title": "교권보호",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1381,
+    "title": "근로청소년",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 670,
+    "title": "불량식품",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1142,
+    "title": "실종아동",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1121,
+    "title": "아동ㆍ청소년 대상 성범죄",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1125,
+    "title": "아동학대",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1138,
+    "title": "어린이 생활건강",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 690,
+    "title": "어린이 생활안전",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1113,
+    "title": "어린이 식품안전",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1290,
+    "title": "어린이집 설치",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1291,
+    "title": "어린이집 운영",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 626,
+    "title": "영유아 보육",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 631,
+    "title": "영유아교육",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 2853,
+    "title": "외국인유학생",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 718,
+    "title": "청소년유해환경",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 659,
+    "title": "청소년의 인터넷 이용하기",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 746,
+    "title": "학교 밖 청소년",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1408,
+    "title": "학교폭력",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 699,
+    "title": "해외유학자",
+    "categorySeq": 2,
+    "category": "아동·청소년/교육"
+  },
+  {
+    "csmSeq": 1169,
+    "title": "건물 안전관리",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1827,
+    "title": "건물 위생관리",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1406,
+    "title": "건축법 등 위반건축물(불법건축물)",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1769,
+    "title": "공공임대주택 입주자",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1171,
+    "title": "공인중개사 1",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1259,
+    "title": "공인중개사 2",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1774,
+    "title": "농지 이용",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1815,
+    "title": "농지전용",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 93,
+    "title": "농지취득",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 2602,
+    "title": "단독주택건축(신축ㆍ개축)",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 2861,
+    "title": "단독주택건축(증축ㆍ대수선)",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 306,
+    "title": "부동산 경매",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 649,
+    "title": "부동산 매매",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 566,
+    "title": "부동산등기",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1772,
+    "title": "빈집 이용 및 관리",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 2043,
+    "title": "산지전용",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 627,
+    "title": "상가건물 임대차",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1248,
+    "title": "아파트 관리",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1773,
+    "title": "아파트 분양받기",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1287,
+    "title": "아파트 생활",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1222,
+    "title": "아파트 입주",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1150,
+    "title": "용도변경",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 666,
+    "title": "이사",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1168,
+    "title": "재개발사업",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1170,
+    "title": "재건축사업",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1972,
+    "title": "전세사기 피해자 지원",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 629,
+    "title": "주택임대차",
+    "categorySeq": 3,
+    "category": "부동산/임대차"
+  },
+  {
+    "csmSeq": 1771,
+    "title": "금융소비자 보호",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 572,
+    "title": "금융투자자(펀드)",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 272,
+    "title": "금전거래",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 275,
+    "title": "대부업체(사채) 이용자",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 1209,
+    "title": "보증",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 2588,
+    "title": "보험계약자",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 1695,
+    "title": "보험모집인",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 585,
+    "title": "신용카드 이용자",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 1775,
+    "title": "유류세 지원",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 1794,
+    "title": "재산신탁",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 1701,
+    "title": "주식투자자",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 730,
+    "title": "주택연금",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 1816,
+    "title": "지역사랑상품권",
+    "categorySeq": 4,
+    "category": "금융/금전"
+  },
+  {
+    "csmSeq": 1505,
+    "title": "1인 창조기업",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 660,
+    "title": "공장설립",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 83,
+    "title": "비영리 사단법인",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 84,
+    "title": "비영리 재단법인",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 1895,
+    "title": "사회적기업",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 897,
+    "title": "옥외광고물 설치자",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 902,
+    "title": "유한책임회사 설립·운영",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 748,
+    "title": "유한회사 (설립·운영)",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 736,
+    "title": "주식회사 설립",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 632,
+    "title": "중소ㆍ벤처기업 창업",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 836,
+    "title": "합명회사(설립·운영)",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 841,
+    "title": "합자회사(설립·운영)",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 674,
+    "title": "협동조합 설립ㆍ운영",
+    "categorySeq": 5,
+    "category": "사업"
+  },
+  {
+    "csmSeq": 907,
+    "title": "결혼중개업",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1450,
+    "title": "경비(업)",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1765,
+    "title": "귀농인",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1010,
+    "title": "네일샵 창업ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 633,
+    "title": "동업계약",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1013,
+    "title": "메이크업샵 창업ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1888,
+    "title": "무인상점 창업 및 운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1009,
+    "title": "미용실 창업ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 864,
+    "title": "민간임대주택사업자",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 534,
+    "title": "민박 사업자",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 302,
+    "title": "반찬가게 창업ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 716,
+    "title": "세탁소 운영자",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1973,
+    "title": "소상공인 지원",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 840,
+    "title": "음식점 운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 839,
+    "title": "음식점 창업",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 25,
+    "title": "인터넷쇼핑몰 창업자",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1971,
+    "title": "지역상권 살리기",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1451,
+    "title": "청소(업)",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1453,
+    "title": "체육시설 설치ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 706,
+    "title": "커피전문점 창업ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 2009,
+    "title": "키즈카페 창업ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1967,
+    "title": "펜션 사업자",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1966,
+    "title": "푸드트럭 창업·운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 647,
+    "title": "프랜차이즈(가맹계약)",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1012,
+    "title": "피부관리실 창업ㆍ운영",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1140,
+    "title": "학원의 설립ㆍ운영 및 과외교습",
+    "categorySeq": 6,
+    "category": "창업"
+  },
+  {
+    "csmSeq": 1770,
+    "title": "국적",
+    "categorySeq": 7,
+    "category": "무역/출입국"
+  },
+  {
+    "csmSeq": 2037,
+    "title": "무역제도Ⅰ(수출)",
+    "categorySeq": 7,
+    "category": "무역/출입국"
+  },
+  {
+    "csmSeq": 2034,
+    "title": "무역제도Ⅱ(수입)",
+    "categorySeq": 7,
+    "category": "무역/출입국"
+  },
+  {
+    "csmSeq": 1703,
+    "title": "비자ㆍ여권",
+    "categorySeq": 7,
+    "category": "무역/출입국"
+  },
+  {
+    "csmSeq": 2605,
+    "title": "수출입 검역ㆍ검사",
+    "categorySeq": 7,
+    "category": "무역/출입국"
+  },
+  {
+    "csmSeq": 1285,
+    "title": "외국인투자자",
+    "categorySeq": 7,
+    "category": "무역/출입국"
+  },
+  {
+    "csmSeq": 1007,
+    "title": "가공식품(농축수산물)",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1006,
+    "title": "건강기능식품",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1011,
+    "title": "농축수산물 소비자",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 557,
+    "title": "다단계판매",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1455,
+    "title": "먹는물",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1651,
+    "title": "소비자 안전정보",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 669,
+    "title": "소비자분쟁해결",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1829,
+    "title": "온라인 직거래 피해",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 835,
+    "title": "인터넷 쇼핑",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 2850,
+    "title": "중고거래 피해자",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 663,
+    "title": "택배",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1504,
+    "title": "해외직구",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1301,
+    "title": "화장품",
+    "categorySeq": 8,
+    "category": "소비자"
+  },
+  {
+    "csmSeq": 1662,
+    "title": "국내여행자",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 715,
+    "title": "면세점 이용",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 1809,
+    "title": "반려동물과 생활하기",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 2858,
+    "title": "온라인 게임 이용자",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 705,
+    "title": "음악저작물 이용",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 695,
+    "title": "저작권보호",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 697,
+    "title": "캠핑(야영)",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 894,
+    "title": "해외여행자",
+    "categorySeq": 9,
+    "category": "문화/여가생활"
+  },
+  {
+    "csmSeq": 294,
+    "title": "가압류 신청",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 2587,
+    "title": "가처분 신청",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 616,
+    "title": "개인파산ㆍ면책절차",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 1286,
+    "title": "개인회생절차",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 1529,
+    "title": "공탁",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 899,
+    "title": "국민참여재판",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 568,
+    "title": "나홀로 민사소송",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 239,
+    "title": "소액사건재판",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 1700,
+    "title": "의료분쟁",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 829,
+    "title": "행정소송",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 763,
+    "title": "행정심판",
+    "categorySeq": 10,
+    "category": "민형사/소송"
+  },
+  {
+    "csmSeq": 749,
+    "title": "개인택시운전",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 684,
+    "title": "교통·운전",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 2860,
+    "title": "교통약자",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 661,
+    "title": "김대리의 안전한 출퇴근길",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 895,
+    "title": "부설주차장 설치ㆍ운영",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 675,
+    "title": "자동차 구입·관리",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 668,
+    "title": "자동차 운전면허",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 1593,
+    "title": "자율주행자동차",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 719,
+    "title": "자전거 운전자",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 1506,
+    "title": "전동킥보드 등 운전자",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 1000,
+    "title": "중고차 매매",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 1151,
+    "title": "화물자동차 운송사업(개인)",
+    "categorySeq": 11,
+    "category": "교통/운전"
+  },
+  {
+    "csmSeq": 1810,
+    "title": "가사근로자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1002,
+    "title": "건설일용근로자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1407,
+    "title": "고객응대근로자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1122,
+    "title": "고령자 고용",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1696,
+    "title": "고령자 일자리",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 2855,
+    "title": "근로시간 단축제도",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1347,
+    "title": "기간제 및 단시간근로자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1589,
+    "title": "배달앱종사자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 570,
+    "title": "산업재해보상보험Ⅰ(업무상 재해)",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 575,
+    "title": "산업재해보상보험Ⅱ(보험급여)",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 722,
+    "title": "실업급여",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1379,
+    "title": "여성근로자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 2042,
+    "title": "외국인근로자 취업",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 2044,
+    "title": "요양보호사",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1326,
+    "title": "유연근무제",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1380,
+    "title": "일과 가정생활",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1694,
+    "title": "임금",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1005,
+    "title": "장애인 고용",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1001,
+    "title": "장애인 취업ㆍ창업",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1658,
+    "title": "청년취업지원",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 999,
+    "title": "퇴직급여제도",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1390,
+    "title": "파견근로자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 514,
+    "title": "해고근로자",
+    "categorySeq": 12,
+    "category": "근로/노동"
+  },
+  {
+    "csmSeq": 1704,
+    "title": "1인가구 지원제도",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 2856,
+    "title": "가족 간병(돌봄)",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 830,
+    "title": "감염병 예방 및 관리",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 47,
+    "title": "결혼이민자",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1141,
+    "title": "국민건강보험(지역가입자)",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1063,
+    "title": "국민건강보험(직장가입자)",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 908,
+    "title": "금연",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 703,
+    "title": "기부 나눔",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1533,
+    "title": "기초생활보장",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 90,
+    "title": "긴급복지지원",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1963,
+    "title": "노인복지",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 2038,
+    "title": "노인장기요양보험",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1660,
+    "title": "노인학대",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 2056,
+    "title": "노후준비와 연금제도",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 638,
+    "title": "다문화가족",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1126,
+    "title": "다자녀가구",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1968,
+    "title": "동물보호ㆍ복지",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 714,
+    "title": "북한이탈주민",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1112,
+    "title": "신혼부부",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 733,
+    "title": "암 예방 및 치료 지원",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1663,
+    "title": "연명의료결정제도",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1889,
+    "title": "예술인 지원",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 735,
+    "title": "임산부",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 2619,
+    "title": "자립준비청년(보호종료아동)",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 263,
+    "title": "장기기증ㆍ이식",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1288,
+    "title": "장애인 교육",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1893,
+    "title": "장애인 교육시설",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 916,
+    "title": "장애인 생활안정",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1003,
+    "title": "장애인 편의ㆍ건강지원",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1136,
+    "title": "재외동포",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 2604,
+    "title": "저출생 지원",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1697,
+    "title": "정신건강돌봄(우울증ㆍ고독사)",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 1588,
+    "title": "정신질환자",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 854,
+    "title": "치매 노인",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 696,
+    "title": "한부모가족",
+    "categorySeq": 13,
+    "category": "복지"
+  },
+  {
+    "csmSeq": 843,
+    "title": "대한민국 여군",
+    "categorySeq": 14,
+    "category": "국방/보훈"
+  },
+  {
+    "csmSeq": 1459,
+    "title": "병역의무자(대체역)",
+    "categorySeq": 14,
+    "category": "국방/보훈"
+  },
+  {
+    "csmSeq": 1464,
+    "title": "병역의무자(보충역)",
+    "categorySeq": 14,
+    "category": "국방/보훈"
+  },
+  {
+    "csmSeq": 1528,
+    "title": "병역의무자(상근·승선근무 예비역)",
+    "categorySeq": 14,
+    "category": "국방/보훈"
+  },
+  {
+    "csmSeq": 1698,
+    "title": "병역의무자(입영 전)",
+    "categorySeq": 14,
+    "category": "국방/보훈"
+  },
+  {
+    "csmSeq": 1461,
+    "title": "병역의무자(현역)",
+    "categorySeq": 14,
+    "category": "국방/보훈"
+  },
+  {
+    "csmSeq": 1965,
+    "title": "예비군 및 민방위",
+    "categorySeq": 14,
+    "category": "국방/보훈"
+  },
+  {
+    "csmSeq": 1257,
+    "title": "개인정보보호",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 1814,
+    "title": "무인비행장치(드론)",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 1702,
+    "title": "분야별 개인정보보호",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 1575,
+    "title": "인터넷 개인방송",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 293,
+    "title": "인터넷 명예훼손",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 901,
+    "title": "인터넷 불법이용 규제",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 724,
+    "title": "특허권",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 1650,
+    "title": "휴대전화 이용자",
+    "categorySeq": 15,
+    "category": "정보통신/기술"
+  },
+  {
+    "csmSeq": 1303,
+    "title": "1회용품 줄이기",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1008,
+    "title": "가정에너지 절약",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1466,
+    "title": "대기오염물질 배출시설 설치·운영",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1346,
+    "title": "미세먼지",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 2039,
+    "title": "산업폐수 배출 및 규제",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1812,
+    "title": "생물다양성 보존",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1970,
+    "title": "생활주변방사선 안전관리",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1890,
+    "title": "소음ㆍ진동",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1394,
+    "title": "실내공기질 관리",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1405,
+    "title": "악취방지",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1896,
+    "title": "야생생물 보호",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 2857,
+    "title": "에너지 위기 대응",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1866,
+    "title": "온실가스 배출권",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1409,
+    "title": "이웃 간 분쟁 해결",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1454,
+    "title": "자동차 배출가스 규제",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1465,
+    "title": "자연재해",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1452,
+    "title": "자원재활용",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1410,
+    "title": "폐기물처리(업)",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 2033,
+    "title": "환경분쟁 해결",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 1404,
+    "title": "환경친화적 자동차",
+    "categorySeq": 16,
+    "category": "환경/에너지"
+  },
+  {
+    "csmSeq": 685,
+    "title": "가정폭력 피해자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 1969,
+    "title": "공연장 안전관리",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 618,
+    "title": "과태료 납부자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 2958,
+    "title": "디지털 성범죄",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 1964,
+    "title": "마약류중독자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 573,
+    "title": "무고죄 피해자ㆍ가해자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 734,
+    "title": "범죄피해자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 911,
+    "title": "부정청탁 및 금품수수 금지",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 2035,
+    "title": "생활화학제품 등 안전관리",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 687,
+    "title": "성범죄 피해자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 279,
+    "title": "성희롱 피해자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 1574,
+    "title": "소방안전관리",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 1661,
+    "title": "스토킹범죄",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 906,
+    "title": "응급의료",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 2862,
+    "title": "인권침해",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 1592,
+    "title": "전자금융범죄",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 250,
+    "title": "집회·시위자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 538,
+    "title": "폭행ㆍ상해의 피해자ㆍ가해자",
+    "categorySeq": 17,
+    "category": "사회안전/범죄"
+  },
+  {
+    "csmSeq": 2601,
+    "title": "공유재산 이용자",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 519,
+    "title": "국가 공사계약자",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 2852,
+    "title": "국유재산 이용자",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 636,
+    "title": "선거권자(유권자)",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 2586,
+    "title": "지방자치단체 공사계약자",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 1693,
+    "title": "지방자치단체 물품계약(제조ㆍ구매)",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 1302,
+    "title": "지방자치단체 용역계약 입찰",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 1344,
+    "title": "지방자치단체 용역계약의 이행 및 분쟁해결",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 898,
+    "title": "지방자치와 주민의 권리",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  },
+  {
+    "csmSeq": 94,
+    "title": "청원ㆍ민원 및 국민제안",
+    "categorySeq": 18,
+    "category": "국가 및 지자체"
+  }
+]

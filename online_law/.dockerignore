@@ -1,10 +1,34 @@
 .venv/
 .git/
+.env
+.DS_Store
+
+# 파이썬
 __pycache__/
 *.pyc
+
+# 런타임 생성물
 checkpoints.db
 checkpoints.db-shm
 checkpoints.db-wal
-.env
 chroma_persist_manifest.json
-data/
+
+# 벡터DB (EC2 볼륨 마운트로 제공)
+chroma_persist/
+chroma_qa/
+
+# 원본 데이터 / 중간 산출물
+pdfs/
+qa_documents.json
+parse_report.txt
+
+# 데이터 파이프라인 스크립트 (런타임 불필요)
+download.py
+parse_pdfs.py
+build_qa_vectordb.py
+csm_catalog.py
+check_law_names.py
+test.py
+
+# 스크린샷
+image*.png

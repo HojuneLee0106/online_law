@@ -1,15 +1,18 @@
+import argparse
 import json
 import os
-import time
 import re
+import time
+
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
+
 from law_api import (
-    CRIMINAL_LAWS,
+    LAW_DOMAINS,
     PRECEDENT_START_DATE,
     PRECEDENT_END_DATE,
     find_current_law,
@@ -21,15 +24,19 @@ load_dotenv()
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_persist")
 MANIFEST_PATH = os.getenv("MANIFEST_PATH", "./chroma_persist_manifest.json")
 
+DOMAIN_CASE_TYPES = {
+    "criminal": {"형사"},
+    "housing": {"민사"},
+    "labor": {"민사", "일반행정"},
+    "traffic": {"형사", "민사"},
+    "civil": {"민사", "가사"},
+}
+
 def _clean_html(text: str)->str:
     text = re.sub(r"<br\s*/?>", "\n", text)
     text = re.sub(r"<[^>]+>", "", text)
     return text.strip()
 
-def _content_to_text(content)-> str:
-    text = re.sub(r"<br\s*/?>", "\n", text)
-    text = re.sub(r"<[^>]+>", "", text)
-    return text.strip()
 
 def _content_to_text(content) -> str:
     """조문내용은 list[list[str]] 형태로 온다. 모두 평탄화해서 하나의 텍스트로."""
@@ -47,15 +54,34 @@ def _content_to_text(content) -> str:
         return "\n".join(flat)
     return str(content)
 
-def precedent_to_documents(law_name: str, start_date: str, end_date: str) -> list[Document]:
-    items = search_precedents_by_law(law_name, start_date, end_date)
+def load_manifest()->dict:
+    if os.path.exists(MANIFEST_PATH):
+        with open(MANIFEST_PATH,"r",encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def save_manifest(manifest: dict) -> None:
+    with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+def build_embeddings():
+    return HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
+
+def precedent_to_documents(law_name: str, domain: str) -> list[Document]:
+    """참조법령명(JO) 기준 대법원 판례를 본문조회하여 Document 리스트로 변환."""
+    items = search_precedents_by_law(law_name, PRECEDENT_START_DATE, PRECEDENT_END_DATE, supreme_only=True)
+    allowed_types=DOMAIN_CASE_TYPES.get(domain, set())
     docs = []
     for item in items:
+        if allowed_types and item.get("사건종류명") not in allowed_types:
+            continue
+
         prec_id = item.get("판례일련번호")
         case_name = item.get("사건명", "")
         case_no = item.get("사건번호", "")
         court = item.get("법원명", "")
         judged_date = item.get("선고일자", "")
+        case_type=item.get("사건종류명", "")
 
         detail = get_precedent_full_text(prec_id)
         service_body = detail.get("PrecService", {})
@@ -69,15 +95,20 @@ def precedent_to_documents(law_name: str, start_date: str, end_date: str) -> lis
             time.sleep(0.2)
             continue
 
-        combined_text = f"[사건명: {case_name}]\n[판시사항]\n{holding}\n\n[판결요지]\n{judgment_summary}\n\n[전문]\n{full_text}"
+        combined_text = (
+            f"[사건명: {case_name}]\n[판시사항]\n{holding}\n\n"
+            f"[판결요지]\n{judgment_summary}\n\n[전문]\n{full_text}"
+        )
 
         docs.append(Document(
             page_content=combined_text,
             metadata={
                 "doc_type": "case",
-                "law_field": law_name,
+                "domain": domain,
+                "law_name": law_name,
                 "case_name": case_name,
                 "case_no": case_no,
+                "case_type": case_type,
                 "court": court,
                 "judged_date": judged_date,
                 "prec_id": prec_id,
@@ -87,23 +118,9 @@ def precedent_to_documents(law_name: str, start_date: str, end_date: str) -> lis
         time.sleep(0.2)
     return docs
 
-def load_manifest() -> dict:
-    if os.path.exists(MANIFEST_PATH):
-        with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
 
-
-def save_manifest(manifest: dict) -> None:
-    with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
-
-def build_embeddings():
-    return HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
-
-def law_to_documents(law_name: str)-> tuple[list[Document], str | None, str | None]:
-    """법령명으로 현행 법령을 찾아 조문 단위 Document 리스트로 변환.
-    반환: (문서 리스트, MST, 시행일자)"""
+def law_to_documents(law_name: str, domain: str) -> tuple[list[Document], str | None, str | None]:
+    """법령명으로 현행 법령을 찾아 조문 단위 Document 리스트로 변환."""
     law_meta=find_current_law(law_name)
     if not law_meta:
         print(f"  [law] '{law_name}' 현행 법령을 찾을 수 없습니다.")
@@ -145,7 +162,7 @@ def law_to_documents(law_name: str)-> tuple[list[Document], str | None, str | No
             page_content=content,
             metadata={
                 "doc_type": "law",
-                "law_field": law_name,
+                "domain": domain,
                 "law_name": law_name,
                 "article_no": jo_no,
                 "article_title": jo_title,
@@ -156,52 +173,78 @@ def law_to_documents(law_name: str)-> tuple[list[Document], str | None, str | No
         ))
     return docs, mst, efYd
 
+def build_domain(domain: str, vectorstore, manifest: dict, splitter) -> None:
+    """한 도메인의 법령 + 판례를 처리."""
+    law_names=LAW_DOMAINS.get(domain)
+    if not law_names:
+        print(f"알 수 없는 도메인: {domain}")
+        return 
+    print(f"\n{'#' * 60}")
+    print(f"# 도메인: {domain} ({len(law_names)}개 법령)")
+    print(f"{'#' * 60}")
+    for law_name in law_names:
+        print(f"\n=== {law_name} ===")
+        law_docs, mst, efYd=law_to_documents(law_name, domain)
+        if law_docs:
+            manifest_key=f"law:{domain}:{law_name}"
+            version_key=f"{mst}:{efYd}"
+            if manifest.get(manifest_key)!=version_key:
+                vectorstore.delete(where={"$and": [
+                    {"law_name": {"$eq": law_name}},
+                    {"domain": {"$eq": domain}},
+                    {"doc_type":{"$eq":"law"}},
+                ]})
+                split_docs=splitter.split_documents(law_docs)
+                vectorstore.add_documents(split_docs)
+                manifest[manifest_key]=version_key
+                print(f"  법령 청크 {len(split_docs)}개 저장 (MST={mst}, 시행일={efYd})")
+            else:
+                print("  법령 변경 없음, 스킵")
+        case_docs=precedent_to_documents(law_name, domain)
+        new_case_docs=[]
+        for doc in case_docs:
+            manifest_key = f"case:{domain}:{doc.metadata['prec_id']}"
+            if manifest.get(manifest_key) != "done":
+                new_case_docs.append(doc)
+                manifest[manifest_key] = "done"
+        if new_case_docs:
+            split_docs=splitter.split_documents(new_case_docs)
+            vectorstore.add_documents(split_docs)
+            print(f"  판례 청크 {len(split_docs)}개 저장 (신규 {len(new_case_docs)}건)")
+        else:
+            print("  신규 판례 없음")
 
-def build_vectorstore(persist_directory: str = CHROMA_PERSIST_DIR):
+def build_vectorstore(domains: list[str] | None = None,
+                      persist_directory: str = CHROMA_PERSIST_DIR):
     embeddings = build_embeddings()
     vectorstore = Chroma(embedding_function=embeddings, persist_directory=persist_directory)
 
     manifest = load_manifest()
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
 
-    for law_name in CRIMINAL_LAWS:
-        print(f"=== {law_name} 처리 중 ===")
+    targets=domains if domains else list(LAW_DOMAINS.keys())
 
-        # --- 법령 처리 ---
-        law_docs, mst, efYd = law_to_documents(law_name)
-        if law_docs:
-            manifest_key = f"law:{law_name}"
-            version_key = f"{mst}:{efYd}"
-            if manifest.get(manifest_key) != version_key:
-                vectorstore.delete(where={"law_name": law_name})
-                split_docs = splitter.split_documents(law_docs)
-                vectorstore.add_documents(split_docs)
-                manifest[manifest_key] = version_key
-                print(f"  법령 청크 {len(split_docs)}개 저장 완료 (MST={mst}, 시행일={efYd})")
-            else:
-                print("  법령 변경 없음, 스킵")
-
-        # --- 판례 처리 ---
-        case_docs = precedent_to_documents(law_name, PRECEDENT_START_DATE, PRECEDENT_END_DATE)
-        new_case_docs = []
-        for doc in case_docs:
-            prec_id = doc.metadata["prec_id"]
-            manifest_key = f"case:{prec_id}"
-            if manifest.get(manifest_key) != "done":
-                new_case_docs.append(doc)
-                manifest[manifest_key] = "done"
-
-        if new_case_docs:
-            split_docs = splitter.split_documents(new_case_docs)
-            vectorstore.add_documents(split_docs)
-            print(f"  판례 청크 {len(split_docs)}개 저장 완료 (신규 판례 {len(new_case_docs)}건)")
-        else:
-            print("  신규 판례 없음")
-
-    save_manifest(manifest)
-    print("Chroma DB 구축 완료")
+    for domain in targets:
+        build_domain(domain, vectorstore, manifest, splitter)
+        save_manifest(manifest)
+    print("\nChroma DB 구축 완료")
     return vectorstore
+
+def load_vectorstore(persist_directory: str=CHROMA_PERSIST_DIR):
+    """이미 구축된 벡터DB를 열기만 함 (API 호출 없음). 서버에서 사용."""
+    return Chroma(
+        embedding_function=build_embeddings(),
+        persist_directory=persist_directory,
+    )
 
 
 if __name__ == "__main__":
-    build_vectorstore()
+    parser=argparse.ArgumentParser(description="법령/판례 벡터DB 구축")
+    parser.add_argument(
+        "--domain",
+        nargs="*",
+        choices=list(LAW_DOMAINS.keys()),
+        help="처리할 도메인 (생략 시 전체). 예: --domain housing labor",
+    )
+    args=parser.parse_args()
+    build_vectorstore(domains=args.domain)

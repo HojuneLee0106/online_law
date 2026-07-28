@@ -59,25 +59,28 @@ def query(req: QueryRequest):
     )
     answer=content_to_text(result["messages"][-1].content)
     return QueryResponse(answer=answer, thread_id=thread_id)
-@app.post("/query/stream",dependencies=[Depends(require_passcode)])
-def query_stream(req: QueryRequest):
-    thread_id=req.thread_id or str(uuid.uuid4())
+@app.post("/query/stream", dependencies=[Depends(require_passcode)])
+async def query_stream(req: QueryRequest):
+    thread_id = req.thread_id or str(uuid.uuid4())
+
     def sse(payload: dict) -> str:
         return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
-    def event_stream():
+
+    async def event_stream():
         yield sse({"thread_id": thread_id})
         try:
-            for chunk, metadata in app.state.rag_graph.stream(
-                {"messages":[HumanMessage(content=req.question)]},
-                config={"configurable":{"thread_id":thread_id}},
+            async for chunk, metadata in app.state.rag_graph.astream(
+                {"messages": [HumanMessage(content=req.question)]},
+                config={"configurable": {"thread_id": thread_id}},
                 stream_mode="messages",
             ):
-                if metadata.get("langgraph_node")=="agent":
-                    token=content_to_text(chunk.content)
+                if metadata.get("langgraph_node") == "agent":
+                    token = content_to_text(chunk.content)
                     if token:
-                        yield sse({"token":token})
+                        yield sse({"token": token})
         except Exception as e:
-            yield sse({"error":str(e)})
+            yield sse({"error": str(e)})
         yield "data: [DONE]\n\n"
-    return StreamingResponse(event_stream(),media_type="text/event-stream")
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 #app.mount("/",StaticFiles(directory="static",html=True), name="static")

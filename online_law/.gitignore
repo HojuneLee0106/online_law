@@ -1,9 +1,25 @@
 .venv/
 .env
-chroma_persist_manifest.json
+.DS_Store
+
+# 파이썬
 __pycache__/
 *.pyc
-.DS_Store
+
+# 런타임 생성물
 checkpoints.db
 checkpoints.db-shm
 checkpoints.db-wal
+chroma_persist_manifest.json
+
+# 벡터DB (EC2 볼륨으로 분리)
+chroma_persist/
+chroma_qa/
+
+# 원본 데이터 / 중간 산출물 (로컬에서만 사용)
+pdfs/
+qa_documents.json
+parse_report.txt
+
+# 스크린샷
+image*.png

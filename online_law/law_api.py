@@ -7,25 +7,52 @@ load_dotenv()
 LAW_API_OC = os.getenv("LAW_API_OC", "")
 BASE_URL = "https://www.law.go.kr/DRF"
 
-CRIMINAL_LAWS = [
-    "형법",
-    "형사소송법",
-    "형의 집행 및 수용자의 처우에 관한 법률",
-    "특정범죄 가중처벌 등에 관한 법률",
-    "특정경제범죄 가중처벌 등에 관한 법률",
-    "성폭력범죄의 처벌 등에 관한 특례법",
-    "성폭력방지 및 피해자보호 등에 관한 법률",
-    "폭력행위 등 처벌에 관한 법률",
-    "아동ㆍ청소년의 성보호에 관한 법률",
-    "가정폭력범죄의 처벌 등에 관한 특례법",
-    "스토킹범죄의 처벌 등에 관한 법률",
-    "소년법",
-    "즉결심판에 관한 절차법",
-    "보안관찰법",
-]
+LAW_DOMAINS = {
+    "criminal": [
+        "형법",
+        "형사소송법",
+        "형의 집행 및 수용자의 처우에 관한 법률",
+        "특정범죄 가중처벌 등에 관한 법률",
+        "특정경제범죄 가중처벌 등에 관한 법률",
+        "성폭력범죄의 처벌 등에 관한 특례법",
+        "성폭력방지 및 피해자보호 등에 관한 법률",
+        "폭력행위 등 처벌에 관한 법률",
+        "아동ㆍ청소년의 성보호에 관한 법률",
+        "가정폭력범죄의 처벌 등에 관한 특례법",
+        "스토킹범죄의 처벌 등에 관한 법률",
+        "소년법",
+        "즉결심판에 관한 절차법",
+        "보안관찰법",
+    ],
+    "housing": [
+        "주택임대차보호법",
+        "상가건물 임대차보호법",
+    ],
+    "labor": [
+        "근로기준법",
+        "근로자퇴직급여 보장법",
+        "최저임금법",
+        "남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률",
+        "산업재해보상보험법",
+    ],
+    "traffic": [
+        "도로교통법",
+        "교통사고처리 특례법",
+        "자동차손해배상 보장법",
+        "특정범죄 가중처벌 등에 관한 법률",   # criminal과 중복 (위험운전치사상)
+    ],
+    "civil": [
+        "민법",
+        "민사소송법",
+        "민사집행법",
+        "채무자 회생 및 파산에 관한 법률",
+    ],
+}
 
 PRECEDENT_START_DATE = "20260101"
 PRECEDENT_END_DATE = "20260721"
+SUPREME_COURT_CODE = "400201"
+
 def _get(path: str, params: dict) -> dict:
     """공통 GET 요청. requests가 한글 파라미터를 자동으로 URL 인코딩해준다."""
     full_params={"OC":LAW_API_OC,"type":"JSON",**params}
@@ -45,21 +72,33 @@ def find_current_law(law_name: str)->dict | None:
     return None
 
 def get_law_full_text(mst: str) -> dict:
-    """법령일련번호(MST)로 본문조회. (법령상세링크의 target=eflaw와 동일하게 맞춤)"""
+    """법령일련번호(MST)로 본문조회."""
     return _get("lawService.do",{"target":"eflaw","MST":mst})
 
-def search_precedents_by_law(law_name: str, start_date: str, end_date: str, display: int =100)->list[dict]:
-    """참조법령명(JO) 기준으로 판례 목록 조회 후, 사건종류명이 '형사'인 것만 반환."""
-    data=_get("lawSearch.do",{
-        "target":"prec",
+def search_precedents_by_law(
+    law_name: str,
+    start_date: str,
+    end_date: str,
+    display: int = 100,
+    supreme_only: bool = True,
+) -> list[dict]:
+    """참조법령명(JO) + 기간으로 판례 목록 조회.
+    주의: org 파라미터를 prncYd와 함께 쓰면 결과가 0건이 되므로,
+    대법원 필터링은 응답에서 직접 수행한다."""
+    params={
+    "target": "prec",
         "JO": law_name,
-        "prncYd":f"{start_date}~{end_date}",
-        "display":display,
-    })
-    precs=data.get("PrecSearch",{}).get("prec",[])
+        "prncYd": f"{start_date}~{end_date}",
+        "display": display,
+    }
+    data = _get("lawSearch.do", params)
+    precs = data.get("PrecSearch", {}).get("prec", [])
     if isinstance(precs, dict):
         precs=[precs]
-    return [p for p in precs if p.get("사건종류명")=="형사"]
+    if supreme_only:
+        precs = [p for p in precs if p.get("법원명") == "대법원"]
+    
+    return precs
 
 def get_precedent_full_text(prec_id: str) -> dict:
     "판례일련번호로 본문조회"
