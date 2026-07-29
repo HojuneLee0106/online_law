@@ -20,7 +20,8 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import START, END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
-from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+import aiosqlite
 from counsel_tools import build_counsel_tools
 from vectordb import load_vectorstore
 
@@ -43,17 +44,21 @@ RESEARCH_PROMPT = (
     "질문의 성격에 맞는 domain을 지정하면 더 정확한 결과를 얻을 수 있습니다. "
     "분야가 애매하면 all을 사용하세요.\n"
     "법조문 해석에는 search_law를, 구체적 사건이나 판단 기준이 필요하면 search_case를 사용하세요.\n"
+    "답변은 간결하게, 핵심만 5~10문장 내외로 정리하세요. "
+    "이모지나 과도한 제목·머리기호는 쓰지 말고, 관련 조문과 처벌 기준 위주로 자연스러운 문장으로 답하세요.\n"
     "충분한 근거를 확보한 뒤에는 반드시 근거 문서의 출처(source)를 밝히며 답하세요. "
     "근거가 부족하면 '해당하는 자료가 없습니다.'라고 답하세요."
 )
  
 COUNSEL_PROMPT = (
     "당신은 생활 속 법률 문제를 쉽게 안내하는 법률 상담 어시스턴트입니다.\n"
-    "search_qa 도구로 법제처 생활법령 백문백답에서 관련 상담 사례를 검색할 수 있습니다.\n"
-    "일상적인 법률 문제에 대해 일반인이 이해하기 쉬운 언어로 대처 방법과 절차를 안내하세요.\n"
-    "검색 결과를 근거로 답하되, 반드시 출처(source)를 밝히세요. "
-    "근거가 부족하면 '해당하는 자료가 없습니다.'라고 답하고, "
-    "구체적 법조문이나 판례가 필요한 사안이면 전문적인 법률 검토가 필요하다고 안내하세요."
+    "search_qa 도구로 법제처 생활법령에서 관련 상담 사례를 검색할 수 있습니다.\n"
+    "일상적인 법률 문제에 대해 이해하기 쉬운 언어로 대처 방법과 절차를 안내하세요.\n"
+    "답변은 간결하게, 핵심만 5~10문장 내외로 정리하세요. "
+    "이모지나 과도한 제목·머리기호는 쓰지 말고, 자연스러운 문장으로 답하세요. "
+    "긴 목록 나열보다 사용자가 실제로 해야 할 핵심 행동 위주로 안내하세요.\n"
+    "검색 결과를 근거로 답하되 반드시 출처(source)를 밝히고, "
+    "근거가 부족하면 '해당하는 자료가 없습니다.'라고 답하세요."
 )
  
 SUPERVISOR_PROMPT = (
@@ -158,10 +163,10 @@ def build_agent_subgraph(raw_llm, tools, system_prompt):
     """agent + tools 루프를 가진 독립 서브그래프. 체크포인터는 상위 그래프가 관리."""
     llm=raw_llm.bind_tools(tools)
     def agent(state: State):
-        messages=state["messages"]
-        if not any(isinstance(m,SystemMessage) for m in messages):
-            messages=[SystemMessage(content=system_prompt), *messages]
-        response=llm.invoke(messages)
+        messages = state["messages"]
+        messages = [m for m in messages if not isinstance(m, SystemMessage)]
+        messages = [SystemMessage(content=system_prompt), *messages]
+        response = llm.invoke(messages)
         return {"messages": [response]}
     sub=StateGraph(State)
     sub.add_node("agent", agent)
@@ -227,6 +232,6 @@ def build_rag_graph(use_api_law: bool = False):
     graph_builder.add_edge("research_agent", END)
     graph_builder.add_edge("counsel_agent", END)
  
-    conn = sqlite3.connect("checkpoints.db", check_same_thread=False)
-    checkpointer = SqliteSaver(conn)
+    conn = aiosqlite.connect("checkpoints.db", check_same_thread=False)
+    checkpointer = AsyncSqliteSaver(conn)
     return graph_builder.compile(checkpointer=checkpointer)

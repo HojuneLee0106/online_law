@@ -9,10 +9,11 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-
-from langchain_core.messages import HumanMessage
+import time
+from langchain_core.messages import HumanMessage, AIMessage
 
 from graph import build_rag_graph
+
 load_dotenv()
 PASSCODE=os.getenv("PASSCODE","")
 def check_passcode(passcode: str)->bool:
@@ -51,13 +52,13 @@ def auth(req: AuthRequest):
         raise HTTPException(status_code=401, detail="Invalid passcode")
     return {"ok": True}
 @app.post("/query", response_model=QueryResponse, dependencies=[Depends(require_passcode)])
-def query(req: QueryRequest):
-    thread_id=req.thread_id or str(uuid.uuid4())
-    result=app.state.rag_graph.invoke(
+async def query(req: QueryRequest):
+    thread_id = req.thread_id or str(uuid.uuid4())
+    result = await app.state.rag_graph.ainvoke(
         {"messages": [HumanMessage(content=req.question)]},
         config={"configurable": {"thread_id": thread_id}},
     )
-    answer=content_to_text(result["messages"][-1].content)
+    answer = content_to_text(result["messages"][-1].content)
     return QueryResponse(answer=answer, thread_id=thread_id)
 @app.post("/query/stream", dependencies=[Depends(require_passcode)])
 async def query_stream(req: QueryRequest):
@@ -74,7 +75,8 @@ async def query_stream(req: QueryRequest):
                 config={"configurable": {"thread_id": thread_id}},
                 stream_mode="messages",
             ):
-                if metadata.get("langgraph_node") == "agent":
+                node = metadata.get("langgraph_node")
+                if node in ("research_agent", "counsel_agent") and isinstance(chunk, AIMessage):
                     token = content_to_text(chunk.content)
                     if token:
                         yield sse({"token": token})
@@ -82,5 +84,13 @@ async def query_stream(req: QueryRequest):
             yield sse({"error": str(e)})
         yield "data: [DONE]\n\n"
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
-#app.mount("/",StaticFiles(directory="static",html=True), name="static")
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",   # nginx 버퍼링 끄기
+            "Connection": "keep-alive",
+        },
+    )
+app.mount("/",StaticFiles(directory="static",html=True), name="static")
