@@ -1,0 +1,235 @@
+
+{
+  "dataset_name": "online_law_eval",
+  "description": "법령·판례 검색 + 생활법령 상담 멀티에이전트 구조 비교 평가용. 순수 법령(3) + 순수 절차(3) + 경계(10) + 멀티턴(2세트=4). category=boundary가 구조 차이를 드러내는 핵심.",
+  "examples": [
+    {
+      "id": "law-1",
+      "question": "음주운전 세 번째 걸리면 처벌 얼마나 세게 받아요?",
+      "category": "pure_law",
+      "expected_route": "research",
+      "expected_tools": [
+        "search_law"
+      ],
+      "rubric_notes": "도로교통법 제148조의2 가중처벌, 재범 기준(10년 내), 혈중알코올농도별 형량 명시."
+    },
+    {
+      "id": "law-2",
+      "question": "남의 물건 훔치면 형이 어떻게 돼요?",
+      "category": "pure_law",
+      "expected_route": "research",
+      "expected_tools": [
+        "search_law"
+      ],
+      "rubric_notes": "형법 제329조 절도죄 법정형(6년 이하 징역 또는 1천만원 이하 벌금) 명시."
+    },
+    {
+      "id": "law-3",
+      "question": "누가 인터넷에 내 욕을 썼는데 명예훼손이랑 모욕죄랑 뭐가 달라요?",
+      "category": "pure_law",
+      "expected_route": "research",
+      "expected_tools": [
+        "search_law"
+      ],
+      "rubric_notes": "명예훼손(사실/허위사실 적시)과 모욕(추상적 경멸 표현)의 구성요건 차이, 각 법정형. 정보통신망법상 사이버명예훼손 언급 가점."
+    },
+    {
+      "id": "proc-1",
+      "question": "애 낳았는데 출생신고 하려면 뭐 준비해야 해요?",
+      "category": "pure_procedure",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa"
+      ],
+      "rubric_notes": "출생증명서, 신고 기한(1개월 이내), 신고 장소(시·구·읍·면), 신고의무자, 미신고 시 과태료 언급."
+    },
+    {
+      "id": "proc-2",
+      "question": "이사했는데 전입신고 어디서 어떻게 하는 거예요?",
+      "category": "pure_procedure",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa"
+      ],
+      "rubric_notes": "주민센터 방문 또는 정부24 온라인, 신고 기한(14일 이내), 필요 서류, 미신고 과태료."
+    },
+    {
+      "id": "proc-3",
+      "question": "형편이 어려운데 기초생활수급 신청 어떻게 해요?",
+      "category": "pure_procedure",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa"
+      ],
+      "rubric_notes": "주소지 주민센터 신청, 소득·재산 기준(중위소득), 필요 서류, 급여 종류(생계·의료·주거·교육) 안내."
+    },
+    {
+      "id": "bound-1",
+      "question": "길 가다 시비 붙어서 골목에서 싸웠는데, 상대가 전치 12주 나오고 저는 경미해요. 근데 목격자도 CCTV도 없고, 상대가 저를 일방적 폭행으로 고소했어요. 어떡하죠?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "쌍방폭행 가능성·정당방위 요건, 증거 확보(진단서·CCTV·목격자·통화기록), 맞고소 검토, 일관된 진술. 변호사 도피만 하면 감점."
+    },
+    {
+      "id": "bound-2",
+      "question": "전세 계약 끝났는데 집주인이 보증금을 안 돌려줘요. 이사는 가야 하는데 어떻게 받아내죠?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "임차권등기명령(이사 전 필수), 보증금반환청구소송, 내용증명, 대항력 유지 위해 전입 유지, 주택임대차보호법 근거."
+    },
+    {
+      "id": "bound-3",
+      "question": "회사에서 갑자기 나오지 말래요. 이유도 제대로 안 알려주고요. 이거 부당해고 아니에요? 뭘 할 수 있어요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "해고 서면통지 요건, 부당해고 구제신청(노동위원회), 신청 기한(3개월), 5인 미만 사업장 예외, 근로기준법 근거."
+    },
+    {
+      "id": "bound-4",
+      "question": "윗집이 밤마다 쿵쾅거려서 잠을 못 자요. 몇 번 말해도 안 고쳐지는데 법적으로 할 수 있는 게 있나요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law"
+      ],
+      "rubric_notes": "층간소음 이웃사이센터, 관리주체 통한 조치, 손해배상·방해배제 청구 가능성, 소음 측정 등 증거. 형사보다 민사·행정 중심이 적절."
+    },
+    {
+      "id": "bound-5",
+      "question": "당근에서 물건 샀는데 돈만 보내고 물건을 안 보내줘요. 연락도 안 되고요. 사기당한 것 같은데 어떻게 해요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "사기죄 성립, 경찰(사이버수사대) 고소, 증거(대화·송금내역) 확보, 경찰청 사이버범죄 신고, 소액이면 민사 소액소송도 언급."
+    },
+    {
+      "id": "bound-6",
+      "question": "와이프가 외도했어요. 이혼하려는데 제 자산이 3억, 와이프가 2억이고 집은 공동명의예요. 외도한 사람한테도 재산분할 해줘야 해요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "유책배우자도 재산분할 청구 가능(혼인 책임과 분할은 별개), 기여도 기반 비율, 위자료는 별도 청구, 유책은 위자료에 반영. 구체 금액 단정 회피는 감점 아님."
+    },
+    {
+      "id": "bound-7",
+      "question": "일한 지 두 달 됐는데 월급을 안 줘요. 사장은 곧 준다고만 하고요. 이거 받아낼 수 있어요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law"
+      ],
+      "rubric_notes": "고용노동부 진정, 체불임금 확인, 지연이자, 사업주 형사처벌 대상, 근로기준법 근거, (해당 시) 대지급금 제도 언급."
+    },
+    {
+      "id": "bound-8",
+      "question": "접촉사고 났는데 상대가 갑자기 목이 아프다면서 합의금을 크게 요구해요. 이거 다 줘야 하나요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "보험 처리 원칙, 과실비율, 과도한 합의금 거부 가능, 진단서·치료 실체 확인, 형사합의와 민사합의 구분, 교통사고처리특례법 근거."
+    },
+    {
+      "id": "bound-9",
+      "question": "아버지가 돌아가셨는데 형이 재산을 다 가지려고 해요. 저도 자식인데 받을 수 있는 거 아니에요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "법정상속분(자녀 균등), 유류분 제도, 유류분반환청구, 유언 존재 여부에 따른 차이, 민법 상속 근거."
+    },
+    {
+      "id": "bound-10",
+      "question": "헤어진 사람이 계속 집 앞에 찾아오고 연락해요. 무서운데 신고할 수 있어요?",
+      "category": "boundary",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law",
+        "search_case"
+      ],
+      "rubric_notes": "스토킹처벌법상 스토킹행위 정의, 112 신고, 긴급응급조치·잠정조치(접근금지), 증거(연락·CCTV) 확보."
+    },
+    {
+      "id": "multi-1a",
+      "question": "전세 보증금을 집주인이 안 돌려줘요.",
+      "category": "multiturn",
+      "turn": 1,
+      "thread": "multi-1",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law"
+      ],
+      "rubric_notes": "1턴: 보증금 미반환 시 대응 개요(내용증명, 임차권등기명령 등)."
+    },
+    {
+      "id": "multi-1b",
+      "question": "그럼 소송하려면 어떻게 해요?",
+      "category": "multiturn",
+      "turn": 2,
+      "thread": "multi-1",
+      "expected_route": "counsel",
+      "expected_tools": [
+        "search_qa",
+        "search_law"
+      ],
+      "rubric_notes": "2턴: 앞의 '전세 보증금' 맥락 유지. 보증금반환청구소송 절차(관할, 소장, 소액소송 여부)를 이어서 답해야. 맥락 상실 시 감점."
+    },
+    {
+      "id": "multi-2a",
+      "question": "음주운전으로 처음 걸렸어요.",
+      "category": "multiturn",
+      "turn": 1,
+      "thread": "multi-2",
+      "expected_route": "research",
+      "expected_tools": [
+        "search_law"
+      ],
+      "rubric_notes": "1턴: 초범 음주운전 처벌·행정처분 개요(혈중알코올농도별)."
+    },
+    {
+      "id": "multi-2b",
+      "question": "면허는 언제 다시 딸 수 있어요?",
+      "category": "multiturn",
+      "turn": 2,
+      "thread": "multi-2",
+      "expected_route": "research",
+      "expected_tools": [
+        "search_law"
+      ],
+      "rubric_notes": "2턴: 앞의 '음주운전' 맥락 유지. 면허 취소·정지 기간, 결격기간, 재취득 절차를 이어서. 맥락 상실 시 감점."
+    }
+  ]
+}

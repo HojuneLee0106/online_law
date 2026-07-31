@@ -31,44 +31,75 @@ load_dotenv()
 VALID_DOMAINS = {"criminal", "housing", "labor", "traffic", "civil", "all"}
 
 
-RESEARCH_PROMPT = (
-    "당신은 법조문과 판례를 근거로 답하는 법률 검색 어시스턴트입니다.\n"
-    "search_law 도구로 관련 법조문을, search_case 도구로 관련 판례를 검색할 수 있습니다.\n"
-    "두 도구 모두 domain 파라미터로 검색 범위를 좁힐 수 있습니다:\n"
-    "- criminal: 형사 (살인, 폭행, 절도, 사기, 성범죄, 스토킹, 형사절차 등)\n"
-    "- housing: 임대차 (전월세, 보증금, 계약갱신, 상가임대차 등)\n"
-    "- labor: 노동 (임금, 해고, 퇴직금, 근로시간, 산재, 직장 내 차별 등)\n"
-    "- traffic: 교통 (음주운전, 교통사고, 자동차 손해배상 등)\n"
-    "- civil: 민사 (계약, 채권채무, 손해배상, 상속, 부동산, 민사소송, 파산회생 등)\n"
-    "- all: 분야가 불분명하거나 여러 분야에 걸친 경우\n\n"
-    "질문의 성격에 맞는 domain을 지정하면 더 정확한 결과를 얻을 수 있습니다. "
-    "분야가 애매하면 all을 사용하세요.\n"
-    "법조문 해석에는 search_law를, 구체적 사건이나 판단 기준이 필요하면 search_case를 사용하세요.\n"
-    "답변은 간결하게, 핵심만 5~10문장 내외로 정리하세요. "
-    "이모지나 과도한 제목·머리기호는 쓰지 말고, 관련 조문과 처벌 기준 위주로 자연스러운 문장으로 답하세요.\n"
-    "충분한 근거를 확보한 뒤에는 반드시 근거 문서의 출처(source)를 밝히며 답하세요. "
-    "근거가 부족하면 '해당하는 자료가 없습니다.'라고 답하세요."
-)
- 
-COUNSEL_PROMPT = (
-    "당신은 생활 속 법률 문제를 쉽게 안내하는 법률 상담 어시스턴트입니다.\n"
-    "search_qa 도구로 법제처 생활법령에서 관련 상담 사례를 검색할 수 있습니다.\n"
-    "일상적인 법률 문제에 대해 이해하기 쉬운 언어로 대처 방법과 절차를 안내하세요.\n"
-    "답변은 간결하게, 핵심만 5~10문장 내외로 정리하세요. "
-    "이모지나 과도한 제목·머리기호는 쓰지 말고, 자연스러운 문장으로 답하세요. "
-    "긴 목록 나열보다 사용자가 실제로 해야 할 핵심 행동 위주로 안내하세요.\n"
-    "검색 결과를 근거로 답하되 반드시 출처(source)를 밝히고, "
-    "근거가 부족하면 '해당하는 자료가 없습니다.'라고 답하세요."
-)
- 
 SUPERVISOR_PROMPT = (
     "당신은 사용자의 법률 질문을 적절한 전문 에이전트로 배정하는 라우터입니다.\n"
-    "질문의 성격을 판단하여 destination을 결정하세요.\n"
-    "- research: 구체적인 법조문·판례·처벌 기준·법적 근거가 필요한 질문 "
-    "(예: '음주운전 3회 처벌은?', '부작위 살인 성립요건')\n"
-    "- counsel: 생활 속 절차·대처 방법을 묻는 상담성 질문 "
-    "(예: '전세금을 못 받았는데 어떻게 하나요?', '해고당했는데 뭘 해야 하죠?')\n"
-    "판단이 애매하면 counsel을 선택하세요."
+    "질문의 성격을 판단하여 destination을 결정하세요.\n\n"
+    "- research: 처벌·형량·고소·소송·법적 책임·정당방위·손해배상 등 "
+    "법적 판단이나 구체적 법조문·판례가 필요한 질문. "
+    "형사사건(폭행, 상해, 사기, 절도, 성범죄, 음주운전 등), 민사 분쟁, "
+    "이혼·상속 등 법적 다툼이 관련되면 반드시 research를 선택하세요.\n"
+    "- counsel: 신고·등록·신청·발급 등 일상적인 행정 절차나 제도 안내가 "
+    "필요한 질문 (출생신고, 전입신고, 각종 지원제도 신청 방법 등).\n\n"
+    "핵심 기준: 누군가의 법적 책임을 따지거나, 처벌·소송·고소가 얽혀 있으면 research. "
+    "단순히 '어떻게 신청/등록/신고하나요'류의 절차 안내면 counsel.\n"
+    "판단이 애매하면 research를 선택하세요."
+)
+
+SINGLE_PROMPT = (
+    "당신은 법률 질문에 답하는 어시스턴트입니다. "
+    "사용자가 변호사를 만나기 전에 스스로 상황을 이해하도록 구체적이고 실질적인 정보를 주세요.\n"
+    "search_law(법조문), search_case(판례), search_qa(생활법령 상담) 도구를 "
+    "질문에 맞게 조합해 사용하세요. 법령·판례 조회 질문엔 search_law/search_case를, "
+    "상황 상담엔 search_qa를 기본으로 하되 법적 근거가 필요하면 함께 사용하세요.\n"
+    "도구 호출 전 '검색하겠습니다' 같은 문장은 출력하지 말고 최종 답변만 제시하세요. "
+    "답변은 핵심 위주로 간결하게, 이모지·과도한 머리기호 없이. "
+    "'변호사와 상담하라'는 정말 필요할 때 맨 끝에 한 번만. 근거 자료가 있으면 출처를 밝히세요."
+)
+
+RESEARCH_PROMPT = (
+    "당신은 법조문과 판례를 근거로 답하는 법률 어시스턴트입니다.\n"
+    "당신의 역할은 사용자가 변호사를 만나기 전에 스스로 상황을 이해하고 "
+    "무엇을 준비해야 할지 파악하도록, 구체적이고 실질적인 정보를 주는 것입니다.\n\n"
+    "search_law 도구로 관련 법조문을, search_case 도구로 관련 판례를 검색할 수 있습니다. "
+    "두 도구 모두 domain 파라미터로 범위를 좁힐 수 있습니다:\n"
+    "- criminal: 형사 (살인, 폭행, 상해, 절도, 사기, 성범죄, 스토킹, 형사절차 등)\n"
+    "- housing: 임대차 (전월세, 보증금, 계약갱신, 상가임대차 등)\n"
+    "- labor: 노동 (임금, 해고, 퇴직금, 근로시간, 산재 등)\n"
+    "- traffic: 교통 (음주운전, 교통사고, 자동차 손해배상 등)\n"
+    "- civil: 민사 (계약, 채권채무, 손해배상, 상속, 이혼, 부동산, 민사소송 등)\n"
+    "- all: 분야가 불분명하거나 여러 분야에 걸친 경우\n"
+    "질문 성격에 맞는 domain을 지정하고, 애매하면 all을 쓰세요. "
+    "법조문 해석에는 search_law, 구체적 판단 기준·사례에는 search_case를 사용하세요.\n\n"
+    "답변 방식:\n"
+    "- 관련 법조문, 성립 요건, 처벌 수준, 대응 절차, 필요한 증거 등을 "
+    "근거와 함께 구체적으로 설명하세요.\n"
+    "- 도구를 호출하기 전에 '검색하겠습니다' 같은 사고 과정이나 안내 문장을 "
+    "출력하지 말고, 검색이 끝난 뒤 최종 답변만 제시하세요.\n"
+    "- 검색 결과가 부족하더라도 '자료를 찾기 어렵다' 같은 말은 하지 말고, "
+    "확보된 정보와 일반적인 법률 지식으로 실질적인 답을 제시하세요.\n"
+    "- 답변은 핵심 위주로 간결하게. 이모지나 과도한 제목·머리기호는 쓰지 마세요.\n"
+    "- '변호사와 상담하라'는 말은 정말 필요한 경우 답변 맨 끝에 한 번만 덧붙이고, "
+    "중간에 반복하거나 그 말로 설명을 대체하지 마세요.\n"
+    "- 근거로 삼은 자료가 있으면 출처(source)를 밝히세요."
+)
+
+COUNSEL_PROMPT = (
+    "당신은 생활 속 법률 문제를 쉽게 안내하는 법률 상담 어시스턴트입니다.\n"
+    "당신의 역할은 사용자가 스스로 상황을 이해하고 무엇을 준비해야 할지 "
+    "파악하도록, 구체적이고 실질적인 정보를 주는 것입니다.\n\n"
+    "search_qa 도구로 법제처 생활법령에서 관련 상담 자료를 검색할 수 있습니다. "
+    "일상적인 절차·신청·제도에 대해 일반인이 이해하기 쉽게 안내하세요.\n\n"
+    "답변 방식:\n"
+    "- 실제로 해야 할 절차, 필요한 서류, 기한, 주의사항을 구체적으로 안내하세요.\n"
+    "- 도구를 호출하기 전에 '검색하겠습니다' 같은 안내 문장을 출력하지 말고, "
+    "검색이 끝난 뒤 최종 답변만 제시하세요.\n"
+    "- 검색 결과가 부족하더라도 '자료를 찾기 어렵다' 같은 말은 하지 말고, "
+    "확보된 정보와 일반적인 지식으로 실질적인 답을 제시하세요.\n"
+    "- 답변은 핵심만 간결하게, 5~10문장 내외로. 이모지나 과도한 제목·머리기호는 "
+    "쓰지 말고 자연스러운 문장으로 답하세요.\n"
+    "- '변호사·전문가와 상담하라'는 말은 정말 필요한 경우 맨 끝에 한 번만 덧붙이고, "
+    "그 말로 설명을 대체하지 마세요.\n"
+    "- 근거로 삼은 자료가 있으면 출처(source)를 밝히세요."
 )
 
 
@@ -176,26 +207,12 @@ def build_agent_subgraph(raw_llm, tools, system_prompt):
     sub.add_edge("tools", "agent")
     return sub.compile()
 
-
-def build_rag_graph(use_api_law: bool = False):
-    vectorstore = load_vectorstore()
-    raw_llm = build_llm()
- 
-    research_agent = build_agent_subgraph(
-        raw_llm, build_research_tools(vectorstore), RESEARCH_PROMPT
-    )
-    counsel_agent = build_agent_subgraph(
-        raw_llm, build_counsel_tools(), COUNSEL_PROMPT
-    )
- 
-    router_llm = raw_llm.with_structured_output(Route)
- 
+def _make_summarizer(raw_llm):
     def summarize_messages(state: State):
         messages = state["messages"]
         if len(messages) <= 20:
             return {}
         cut = len(messages) - 10
-        # tool_call/tool_result 쌍이 잘리지 않게 경계 보정
         while cut < len(messages) and isinstance(messages[cut], ToolMessage):
             cut += 1
         old_messages = messages[:cut]
@@ -209,29 +226,72 @@ def build_rag_graph(use_api_law: bool = False):
             "messages": [RemoveMessage(id=m.id) for m in old_messages]
             + [HumanMessage(content=f"[이전 대화 요약]\n{summary.content}")]
         }
- 
+    return summarize_messages
+
+def build_rag_graph(variant: str = "current", use_checkpointer: bool = True):
+    """
+    variant:
+      - "current": 라우팅 + 배타적 도구 (research=[law,case], counsel=[qa])
+      - "shared" : 라우팅 + 도구 공유 (counsel에 law,case 추가)
+      - "single" : 라우팅 없음, 단일 에이전트가 전체 도구 사용
+    """
+    vectorstore = load_vectorstore()
+    raw_llm = build_llm()
+
+    # 도구 준비
+    research_tools = build_research_tools(vectorstore)   # [search_law, search_case]
+    qa_tools = build_counsel_tools()                     # [search_qa]
+
+    checkpointer = None
+    if use_checkpointer:
+        checkpointer = AsyncSqliteSaver(
+            aiosqlite.connect("checkpoints.db", check_same_thread=False)
+        )
+
+    # ── variant: single (라우팅 없는 단일 에이전트) ──
+    if variant == "single":
+        all_tools = [*research_tools, *qa_tools]
+        single_agent = build_agent_subgraph(raw_llm, all_tools, SINGLE_PROMPT)
+
+        g = StateGraph(State)
+        g.add_node("summarize", _make_summarizer(raw_llm))
+        g.add_node("single_agent", single_agent)
+        g.add_edge(START, "summarize")
+        g.add_edge("summarize", "single_agent")
+        g.add_edge("single_agent", END)
+        return g.compile(checkpointer=checkpointer)
+
+    # ── variant: current / shared (멀티에이전트 + 라우팅) ──
+    if variant == "shared":
+        counsel_tool_list = [*qa_tools, *research_tools]  # qa + law + case
+    else:  # current
+        counsel_tool_list = qa_tools                      # qa only
+
+    research_agent = build_agent_subgraph(raw_llm, research_tools, RESEARCH_PROMPT)
+    counsel_agent = build_agent_subgraph(raw_llm, counsel_tool_list, COUNSEL_PROMPT)
+
+    router_llm = raw_llm.with_structured_output(Route)
+
     def supervisor(state: State):
         decision = router_llm.invoke([
             SystemMessage(content=SUPERVISOR_PROMPT),
-            state["messages"][-1],  # 최신 질문만 보고 분류
+            state["messages"][-1],
         ])
         return {"route": decision.destination}
- 
+
     def route_edge(state: State) -> Literal["research_agent", "counsel_agent"]:
         return "research_agent" if state["route"] == "research" else "counsel_agent"
- 
-    graph_builder = StateGraph(State)
-    graph_builder.add_node("summarize", summarize_messages)
-    graph_builder.add_node("supervisor", supervisor)
-    graph_builder.add_node("research_agent", research_agent)
-    graph_builder.add_node("counsel_agent", counsel_agent)
- 
-    graph_builder.add_edge(START, "summarize")
-    graph_builder.add_edge("summarize", "supervisor")
-    graph_builder.add_conditional_edges("supervisor", route_edge)
-    graph_builder.add_edge("research_agent", END)
-    graph_builder.add_edge("counsel_agent", END)
- 
-    conn = aiosqlite.connect("checkpoints.db", check_same_thread=False)
-    checkpointer = AsyncSqliteSaver(conn)
-    return graph_builder.compile(checkpointer=checkpointer)
+
+    g = StateGraph(State)
+    g.add_node("summarize", _make_summarizer(raw_llm))
+    g.add_node("supervisor", supervisor)
+    g.add_node("research_agent", research_agent)
+    g.add_node("counsel_agent", counsel_agent)
+
+    g.add_edge(START, "summarize")
+    g.add_edge("summarize", "supervisor")
+    g.add_conditional_edges("supervisor", route_edge)
+    g.add_edge("research_agent", END)
+    g.add_edge("counsel_agent", END)
+
+    return g.compile(checkpointer=checkpointer)

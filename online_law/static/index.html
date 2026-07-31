@@ -7,320 +7,272 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #f4f5f7;
-      --panel: #ffffff;
-      --line: #e3e6ea;
-      --text: #1c2024;
-      --muted: #6b7280;
-      --accent: #3355dd;
-      --user-bubble: #3355dd;
-      --bot-bubble: #eef0f3;
+      --bg: #f4f5f7; --panel: #ffffff; --sidebar: #1f2430;
+      --sidebar-hover: #2b3140; --sidebar-active: #3355dd;
+      --line: #e3e6ea; --text: #1c2024; --muted: #6b7280;
+      --accent: #3355dd; --user-bubble: #3355dd; --bot-bubble: #eef0f3; --danger: #d33;
     }
+    html, body { height: 100%; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
         "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden;
     }
-    header {
-      padding: 14px 20px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    header h1 { font-size: 16px; font-weight: 700; }
+    #auth { position: fixed; inset: 0; background: var(--bg); display: flex;
+      align-items: center; justify-content: center; z-index: 20; }
+    #auth .card { background: #fff; padding: 36px 32px; border-radius: 16px; width: 340px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid var(--line); }
+    #auth h1 { font-size: 20px; margin-bottom: 4px; }
+    #auth .tagline { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    #auth label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+    #auth input { width: 100%; border: 1px solid var(--line); border-radius: 10px;
+      padding: 11px 13px; font-size: 15px; outline: none; }
+    #auth input:focus { border-color: var(--accent); }
+    #auth button.primary { width: 100%; margin-top: 20px; background: var(--accent); color: #fff;
+      border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    #auth button.primary:disabled { opacity: .5; cursor: not-allowed; }
+    #auth .toggle { text-align: center; margin-top: 16px; font-size: 13px; color: var(--muted); }
+    #auth .toggle a { color: var(--accent); cursor: pointer; font-weight: 600; }
+    #auth .msg { font-size: 13px; margin-top: 12px; min-height: 18px; }
+    #auth .msg.error { color: var(--danger); }
+    #auth .msg.ok { color: #2a8; }
+    #sidebar { width: 260px; background: var(--sidebar); color: #e6e8ee;
+      display: flex; flex-direction: column; flex-shrink: 0; }
+    #sidebar .top { padding: 16px; }
+    #newChat { width: 100%; background: var(--sidebar-active); color: #fff; border: none;
+      border-radius: 10px; padding: 11px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #convList { flex: 1; overflow-y: auto; padding: 4px 8px; }
+    .conv-item { padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer;
+      color: #c7cbd6; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-item:hover { background: var(--sidebar-hover); }
+    .conv-item.active { background: var(--sidebar-hover); color: #fff; }
+    #sidebar .bottom { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.08);
+      font-size: 13px; color: #9aa0ae; display: flex; justify-content: space-between; align-items: center; }
+    #sidebar .bottom a { color: #9aa0ae; cursor: pointer; }
+    #sidebar .bottom a:hover { color: #fff; }
+    #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    header { padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--line); flex-shrink: 0; }
+    header h2 { font-size: 16px; }
     header .sub { font-size: 12px; color: var(--muted); }
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+    #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
     .msg { display: flex; max-width: 780px; width: 100%; margin: 0 auto; }
-    .msg .bubble {
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 15px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+    .msg .bubble { padding: 12px 16px; border-radius: 14px; font-size: 15px; line-height: 1.6;
+      white-space: pre-wrap; word-break: break-word; }
     .msg.user { justify-content: flex-end; }
-    .msg.user .bubble {
-      background: var(--user-bubble);
-      color: #fff;
-      border-bottom-right-radius: 4px;
-      max-width: 75%;
-    }
-    .msg.bot .bubble {
-      background: var(--bot-bubble);
-      color: var(--text);
-      border-bottom-left-radius: 4px;
-      max-width: 85%;
-    }
-    .msg.bot .bubble.pending::after {
-      content: "▋";
-      animation: blink 1s steps(2) infinite;
-      color: var(--muted);
-    }
+    .msg.user .bubble { background: var(--user-bubble); color: #fff; border-bottom-right-radius: 4px; max-width: 75%; }
+    .msg.bot .bubble { background: var(--bot-bubble); color: var(--text); border-bottom-left-radius: 4px; max-width: 85%; }
+    .msg.bot .bubble.pending::after { content: "▋"; animation: blink 1s steps(2) infinite; color: var(--muted); }
     @keyframes blink { 0%,50%{opacity:1;} 50.01%,100%{opacity:0;} }
-    footer {
-      padding: 14px 20px;
-      background: var(--panel);
-      border-top: 1px solid var(--line);
-      flex-shrink: 0;
-    }
-    .input-row {
-      max-width: 780px;
-      margin: 0 auto;
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-    #q {
-      flex: 1;
-      resize: none;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-family: inherit;
-      line-height: 1.5;
-      max-height: 140px;
-      outline: none;
-    }
+    .empty-hint { text-align: center; color: var(--muted); font-size: 13px; margin: auto; }
+    footer { padding: 14px 20px; background: var(--panel); border-top: 1px solid var(--line); flex-shrink: 0; }
+    .input-row { max-width: 780px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
+    #q { flex: 1; resize: none; border: 1px solid var(--line); border-radius: 12px;
+      padding: 12px 14px; font-size: 15px; font-family: inherit; line-height: 1.5; max-height: 140px; outline: none; }
     #q:focus { border-color: var(--accent); }
-    button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    /* passcode 게이트 */
-    #gate {
-      position: fixed;
-      inset: 0;
-      background: rgba(20,24,30,0.55);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-    #gate .card {
-      background: #fff;
-      padding: 28px;
-      border-radius: 16px;
-      width: 320px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    #gate h2 { font-size: 17px; margin-bottom: 6px; }
-    #gate p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-    #gate input {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 11px 13px;
-      font-size: 15px;
-      margin-bottom: 12px;
-      outline: none;
-    }
-    #gate input:focus { border-color: var(--accent); }
-    #gate button { width: 100%; }
-    #gate .err { color: #d33; font-size: 13px; margin-top: 8px; display: none; }
-    .hint {
-      max-width: 780px; margin: 0 auto 8px; font-size: 12px; color: var(--muted);
-    }
+    #send { background: var(--accent); color: #fff; border: none; border-radius: 12px;
+      padding: 12px 20px; font-size: 15px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+    #send:disabled { opacity: .5; cursor: not-allowed; }
+    @media (max-width: 640px) { #sidebar { display: none; } }
   </style>
 </head>
 <body>
-  <!-- passcode 입력 게이트 -->
-  <div id="gate">
+  <div id="auth">
     <div class="card">
-      <h2>생활법령 상담</h2>
-      <p>접속 코드를 입력하세요.</p>
-      <input id="pc" type="password" placeholder="passcode" autocomplete="off" />
-      <button id="pcBtn">입장</button>
-      <div class="err" id="pcErr">코드가 올바르지 않습니다.</div>
-    </div>
-  </div>
-
-  <header>
-    <div>
       <h1>⚖️ 생활법령 상담</h1>
-      <div class="sub">법조문·판례 검색과 생활법령 상담을 도와드립니다.</div>
+      <div class="tagline">법조문·판례와 생활법령 상담을 도와드립니다.</div>
+      <label for="au">아이디</label>
+      <input id="au" autocomplete="username" />
+      <label for="ap">비밀번호</label>
+      <input id="ap" type="password" autocomplete="current-password" />
+      <button class="primary" id="authBtn">로그인</button>
+      <div class="toggle" id="toggleWrap">계정이 없으신가요? <a id="toggleLink">회원가입</a></div>
+      <div class="msg" id="authMsg"></div>
     </div>
-  </header>
-
-  <div id="chat">
-    <div class="hint">예: "재혼 후 자녀 성을 바꿀 수 있나요?" / "음주운전 처벌 기준은?"</div>
   </div>
-
-  <footer>
-    <div class="input-row">
-      <textarea id="q" rows="1" placeholder="질문을 입력하세요…"></textarea>
-      <button id="send">전송</button>
-    </div>
-  </footer>
-
+  <aside id="sidebar">
+    <div class="top"><button id="newChat">+ 새 대화</button></div>
+    <div id="convList"></div>
+    <div class="bottom"><span id="whoami"></span><a id="logout">로그아웃</a></div>
+  </aside>
+  <div id="main">
+    <header>
+      <h2>생활법령 상담</h2>
+      <div class="sub">예: "재혼 후 자녀 성을 바꿀 수 있나요?" / "음주운전 처벌 기준은?"</div>
+    </header>
+    <div id="chat"><div class="empty-hint" id="emptyHint">새 대화를 시작하세요.</div></div>
+    <footer>
+      <div class="input-row">
+        <textarea id="q" rows="1" placeholder="질문을 입력하세요…"></textarea>
+        <button id="send">전송</button>
+      </div>
+    </footer>
+  </div>
   <script>
-    // 같은 오리진에서 서빙되므로 상대경로 사용 (배포/로컬 공용)
     const API = "";
-    let passcode = "";
+    let mode = "login";
+    let token = localStorage.getItem("token") || "";
+    let username = localStorage.getItem("username") || "";
     let threadId = null;
-
-    const gate = document.getElementById("gate");
-    const pcInput = document.getElementById("pc");
-    const pcBtn = document.getElementById("pcBtn");
-    const pcErr = document.getElementById("pcErr");
+    const authEl = document.getElementById("auth");
+    const auInput = document.getElementById("au");
+    const apInput = document.getElementById("ap");
+    const authBtn = document.getElementById("authBtn");
+    const toggleWrap = document.getElementById("toggleWrap");
+    const authMsg = document.getElementById("authMsg");
+    const convList = document.getElementById("convList");
+    const whoami = document.getElementById("whoami");
     const chat = document.getElementById("chat");
     const q = document.getElementById("q");
     const sendBtn = document.getElementById("send");
 
-    // --- passcode 검증 (/auth 사용) ---
-    async function tryAuth() {
-      const code = pcInput.value;
-      pcErr.style.display = "none";
-      try {
-        const res = await fetch(API + "/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ passcode: code }),
-        });
-        if (res.ok) {
-          passcode = code;
-          gate.style.display = "none";
-          q.focus();
-        } else {
-          pcErr.style.display = "block";
-        }
-      } catch (e) {
-        pcErr.textContent = "서버에 연결할 수 없습니다.";
-        pcErr.style.display = "block";
+    function setMode(m) {
+      mode = m; authMsg.textContent = "";
+      if (m === "login") {
+        authBtn.textContent = "로그인";
+        toggleWrap.innerHTML = '계정이 없으신가요? <a id="toggleLink">회원가입</a>';
+      } else {
+        authBtn.textContent = "회원가입";
+        toggleWrap.innerHTML = '이미 계정이 있으신가요? <a id="toggleLink">로그인</a>';
       }
+      document.getElementById("toggleLink").onclick = () => setMode(m === "login" ? "register" : "login");
     }
-    pcBtn.onclick = tryAuth;
-    pcInput.onkeydown = (e) => { if (e.key === "Enter") tryAuth(); };
+    async function submitAuth() {
+      const u = auInput.value.trim(); const p = apInput.value;
+      if (!u || !p) { showAuthMsg("아이디와 비밀번호를 입력하세요.", "error"); return; }
+      authBtn.disabled = true;
+      try {
+        if (mode === "register") {
+          const res = await fetch(API + "/api/register", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: u, password: p }) });
+          const data = await res.json();
+          if (!res.ok) { showAuthMsg(data.detail || "가입 실패", "error"); return; }
+          showAuthMsg("가입 완료! 로그인하세요.", "ok"); setMode("login");
+        } else {
+          const res = await fetch(API + "/api/login", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: u, password: p }) });
+          const data = await res.json();
+          if (!res.ok) { showAuthMsg(data.detail || "로그인 실패", "error"); return; }
+          token = data.token; username = u;
+          localStorage.setItem("token", token); localStorage.setItem("username", username);
+          enterApp();
+        }
+      } catch (e) { showAuthMsg("서버에 연결할 수 없습니다.", "error"); }
+      finally { authBtn.disabled = false; }
+    }
+    function showAuthMsg(text, kind) { authMsg.textContent = text; authMsg.className = "msg " + (kind || ""); }
+    authBtn.onclick = submitAuth;
+    apInput.onkeydown = (e) => { if (e.key === "Enter") submitAuth(); };
 
-    // --- 메시지 버블 추가 ---
+    function enterApp() {
+      authEl.style.display = "none"; whoami.textContent = username;
+      loadConversations(); startNewChat();
+    }
+    document.getElementById("logout").onclick = () => {
+      localStorage.removeItem("token"); localStorage.removeItem("username");
+      token = ""; username = ""; authEl.style.display = "flex";
+      convList.innerHTML = ""; chat.innerHTML = '<div class="empty-hint">새 대화를 시작하세요.</div>';
+    };
+
+    async function loadConversations() {
+      try {
+        const res = await fetch(API + "/api/conversations", { headers: { "Authorization": "Bearer " + token } });
+        if (res.status === 401) { forceLogout(); return; }
+        const data = await res.json(); renderConvList(data.conversations || []);
+      } catch (e) {}
+    }
+    function renderConvList(items) {
+      convList.innerHTML = "";
+      items.forEach((c) => {
+        const div = document.createElement("div");
+        div.className = "conv-item" + (c.thread_id === threadId ? " active" : "");
+        div.textContent = c.title || "제목 없음";
+        div.onclick = () => openConversation(c.thread_id);
+        convList.appendChild(div);
+      });
+    }
+    async function openConversation(tid) {
+      try {
+        const res = await fetch(API + "/api/conversations/" + tid, { headers: { "Authorization": "Bearer " + token } });
+        if (res.status === 401) { forceLogout(); return; }
+        const data = await res.json();
+        threadId = tid; chat.innerHTML = "";
+        (data.messages || []).forEach((m) => addMsg(m.role === "user" ? "user" : "bot", m.content));
+        loadConversations();
+      } catch (e) {}
+    }
+    function startNewChat() {
+      threadId = null;
+      chat.innerHTML = '<div class="empty-hint">무엇이든 물어보세요.</div>';
+      loadConversations(); q.focus();
+    }
+    document.getElementById("newChat").onclick = startNewChat;
+
     function addMsg(role, text) {
+      const hint = chat.querySelector(".empty-hint");
+      if (hint) hint.remove();
       const wrap = document.createElement("div");
       wrap.className = "msg " + role;
       const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      bubble.textContent = text;
-      wrap.appendChild(bubble);
-      chat.appendChild(wrap);
+      bubble.className = "bubble"; bubble.textContent = text;
+      wrap.appendChild(bubble); chat.appendChild(wrap);
       chat.scrollTop = chat.scrollHeight;
       return bubble;
     }
+    q.addEventListener("input", () => { q.style.height = "auto"; q.style.height = Math.min(q.scrollHeight, 140) + "px"; });
 
-    // --- textarea 자동 높이 ---
-    q.addEventListener("input", () => {
-      q.style.height = "auto";
-      q.style.height = Math.min(q.scrollHeight, 140) + "px";
-    });
-
-    // --- 전송 + 스트리밍 수신 ---
     async function send() {
       const question = q.value.trim();
       if (!question) return;
-
       addMsg("user", question);
-      q.value = "";
-      q.style.height = "auto";
-      sendBtn.disabled = true;
-
-      const botBubble = addMsg("bot", "");
-      botBubble.classList.add("pending");
-
+      q.value = ""; q.style.height = "auto"; sendBtn.disabled = true;
+      const botBubble = addMsg("bot", ""); botBubble.classList.add("pending");
+      const isNew = !threadId;
       try {
-        const res = await fetch(API + "/query/stream", {
+        const res = await fetch(API + "/api/query/stream", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-passcode": passcode,
-          },
-          body: JSON.stringify({ question, thread_id: threadId }),
-        });
-
-        if (!res.ok) {
-          botBubble.classList.remove("pending");
-          botBubble.textContent = "오류: 서버 응답 " + res.status;
-          sendBtn.disabled = false;
-          return;
-        }
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        let answer = "";
-
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify({ question, thread_id: threadId }) });
+        if (res.status === 401) { forceLogout(); return; }
+        if (!res.ok) { botBubble.classList.remove("pending"); botBubble.textContent = "오류: 서버 응답 " + res.status; return; }
+        const reader = res.body.getReader(); const decoder = new TextDecoder();
+        let buffer = "", answer = "";
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
-
-          // SSE는 \n\n 로 이벤트 구분
-          const parts = buffer.split("\n\n");
-          buffer = parts.pop(); // 마지막 미완성 조각 보관
-
+          const parts = buffer.split("\n\n"); buffer = parts.pop();
           for (const part of parts) {
             const line = part.trim();
             if (!line.startsWith("data:")) continue;
             const payload = line.slice(5).trim();
-
             if (payload === "[DONE]") continue;
-
             try {
               const obj = JSON.parse(payload);
               if (obj.thread_id) threadId = obj.thread_id;
-              if (obj.token) {
-                answer += obj.token;
-                botBubble.textContent = answer;
-                chat.scrollTop = chat.scrollHeight;
-              }
-              if (obj.error) {
-                answer += "\n[오류] " + obj.error;
-                botBubble.textContent = answer;
-              }
-            } catch (_) { /* 파싱 실패한 조각 무시 */ }
+              if (obj.token) { answer += obj.token; botBubble.textContent = answer; chat.scrollTop = chat.scrollHeight; }
+              if (obj.error) { answer += "\n[오류] " + obj.error; botBubble.textContent = answer; }
+            } catch (_) {}
           }
         }
-
         botBubble.classList.remove("pending");
         if (!answer) botBubble.textContent = "(응답이 비어 있습니다)";
-      } catch (e) {
-        botBubble.classList.remove("pending");
-        botBubble.textContent = "오류: " + e.message;
-      } finally {
-        sendBtn.disabled = false;
-        q.focus();
-      }
+        if (isNew) loadConversations();
+      } catch (e) { botBubble.classList.remove("pending"); botBubble.textContent = "오류: " + e.message; }
+      finally { sendBtn.disabled = false; q.focus(); }
     }
-
     sendBtn.onclick = send;
     q.addEventListener("keydown", (e) => {
-    // 한글 등 IME 조합 중이면 Enter 무시 (조합 확정용)
       if (e.isComposing || e.keyCode === 229) return;
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        send();
-        }
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
     });
+    function forceLogout() {
+      localStorage.removeItem("token"); localStorage.removeItem("username"); token = "";
+      authEl.style.display = "flex"; showAuthMsg("세션이 만료되었습니다. 다시 로그인하세요.", "error");
+    }
+    setMode("login");
+    if (token) enterApp();
   </script>
 </body>
 </html>

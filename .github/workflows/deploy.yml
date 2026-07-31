@@ -50,8 +50,9 @@ jobs:
               -p 8000:8000 \
               -v /home/ubuntu/chroma_data/chroma_persist:/app/chroma_persist \
               -v /home/ubuntu/chroma_data/chroma_qa:/app/chroma_qa \
+              -v /home/ubuntu/app_data/users.db:/app/users.db \
+              -v /home/ubuntu/app_data/checkpoints.db:/app/checkpoints.db \
               -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
-              -e ANTHROPIC_MODEL="claude-sonnet-4-6" \
+              -e ANTHROPIC_MODEL="claude-haiku-4-5" \
               -e LLM_PROVIDER="anthropic" \
-              -e PASSCODE="${{ secrets.PASSCODE }}" \
               ghcr.io/hojunelee0106/online_law:latest

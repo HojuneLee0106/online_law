@@ -25,4 +25,5 @@ dependencies = [
     "langgraph-checkpoint-sqlite>=3.1.0",
     "pdfplumber>=0.11.10",
     "aiosqlite>=0.22.1",
+    "bcrypt>=5.0.0",
 ]
