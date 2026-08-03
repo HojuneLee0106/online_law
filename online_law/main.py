@@ -98,13 +98,13 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
     async def event_stream():
         yield sse({"thread_id": thread_id})
         try:
-            async for chunk, metadata in app.state.rag_graph.astream(
+            async for event in app.state.rag_graph.astream_events(
                 {"messages": [HumanMessage(content=req.question)]},
                 config={"configurable": {"thread_id": thread_id}},
-                stream_mode="messages",
+                version="v2",
             ):
-                node = metadata.get("langgraph_node")
-                if node in ("research_agent", "counsel_agent", "single_agent") and isinstance(chunk, AIMessage):
+                if event["event"] == "on_chat_model_stream":
+                    chunk = event["data"]["chunk"]
                     token = content_to_text(chunk.content)
                     if token:
                         yield sse({"token": token})

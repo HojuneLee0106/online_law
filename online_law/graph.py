@@ -110,6 +110,7 @@ def build_llm():
         return ChatAnthropic(
             model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+            streaming=True,
         )
     else:
         return ChatGoogleGenerativeAI(
