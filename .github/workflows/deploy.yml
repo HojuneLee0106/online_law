@@ -40,12 +40,13 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: "20m"
           script: |
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/hojunelee0106/online_law:latest
             docker stop online-law || true
             docker rm online-law || true
             docker image prune -af
+            docker pull ghcr.io/hojunelee0106/online_law:latest
             docker run -d --name online-law \
               --restart unless-stopped \
               -p 8000:8000 \
