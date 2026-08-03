@@ -135,3 +135,13 @@ def owns_thread(user_id: int, thread_id: str) -> bool:
             (thread_id, user_id),
         ).fetchone()
     return row is not None
+
+
+def delete_conversation(user_id: int, thread_id: str) -> bool:
+    """유저 소유의 대화 삭제. 삭제됐으면 True."""
+    with get_conn() as conn:
+        cur = conn.execute(
+            "DELETE FROM conversations WHERE thread_id = ? AND user_id = ?",
+            (thread_id, user_id),
+        )
+    return cur.rowcount > 0

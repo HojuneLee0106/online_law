@@ -121,6 +121,17 @@ def get_conversations(user_id: int = Depends(get_current_user)):
     return {"conversations": db.list_conversations(user_id)}
 
 
+@app.delete("/api/conversations/{thread_id}")
+async def delete_conversation(thread_id: str, user_id: int = Depends(get_current_user)):
+    if not db.owns_thread(user_id, thread_id):
+        raise HTTPException(status_code=403, detail="접근 권한이 없습니다.")
+    db.delete_conversation(user_id, thread_id)
+    checkpointer = app.state.rag_graph.checkpointer
+    if checkpointer is not None:
+        await checkpointer.adelete_thread(thread_id)
+    return {"ok": True}
+
+
 @app.get("/api/conversations/{thread_id}")
 async def get_conversation(thread_id: str, user_id: int = Depends(get_current_user)):
     if not db.owns_thread(user_id, thread_id):
