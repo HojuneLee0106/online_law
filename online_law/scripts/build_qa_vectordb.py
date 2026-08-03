@@ -13,14 +13,16 @@ qa_documents.json -> Chroma 벡터DB 적재 (counsel_agent 전용)
 """
  
 import json
- 
+from pathlib import Path
+
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
- 
-QA_JSON = "qa_documents.json"
-PERSIST_DIR = "./chroma_qa"          # counsel 전용 (research와 폴더 분리)
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+QA_JSON = ROOT_DIR / "data" / "qa_documents.json"
+PERSIST_DIR = ROOT_DIR / "var" / "chroma_qa"   # counsel 전용 (research와 폴더 분리)
 COLLECTION = "life_law"
  
  
@@ -53,7 +55,7 @@ def main():
     vectorstore = Chroma(
         collection_name=COLLECTION,
         embedding_function=embeddings,
-        persist_directory=PERSIST_DIR,
+        persist_directory=str(PERSIST_DIR),
     )
     BATCH = 5000
     for i in range(0, len(docs), BATCH):

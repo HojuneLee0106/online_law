@@ -11,7 +11,7 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
 
-from law_api import (
+from app.law_api import (
     LAW_DOMAINS,
     PRECEDENT_START_DATE,
     PRECEDENT_END_DATE,
@@ -21,8 +21,8 @@ from law_api import (
     get_precedent_full_text,
 )
 load_dotenv()
-CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_persist")
-MANIFEST_PATH = os.getenv("MANIFEST_PATH", "./chroma_persist_manifest.json")
+CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./var/chroma_persist")
+MANIFEST_PATH = os.getenv("MANIFEST_PATH", "./var/chroma_persist_manifest.json")
 
 DOMAIN_CASE_TYPES = {
     "criminal": {"형사"},

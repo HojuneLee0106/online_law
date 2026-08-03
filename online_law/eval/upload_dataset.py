@@ -1,13 +1,16 @@
 """eval_dataset.json의 단일턴 16문항을 LangSmith 데이터셋으로 업로드."""
 import json
+from pathlib import Path
+
 from dotenv import load_dotenv
 from langsmith import Client
 
 load_dotenv()
 
 DATASET_NAME = "online_law_eval"
+DATASET_PATH = Path(__file__).resolve().parent / "eval_dataset.json"
 
-with open("eval_dataset.json", encoding="utf-8") as f:
+with open(DATASET_PATH, encoding="utf-8") as f:
     data = json.load(f)
 
 # 멀티턴 제외 (single-turn만)

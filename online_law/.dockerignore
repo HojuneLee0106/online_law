@@ -7,29 +7,10 @@
 __pycache__/
 *.pyc
 
-# 런타임 생성물
-checkpoints.db
-checkpoints.db-shm
-checkpoints.db-wal
-chroma_persist_manifest.json
+# 런타임 생성물 (EC2 볼륨 마운트로 제공)
+var/
 
-# 벡터DB (EC2 볼륨 마운트로 제공)
-chroma_persist/
-chroma_qa/
-
-# 원본 데이터 / 중간 산출물
-pdfs/
-qa_documents.json
-parse_report.txt
-
-# 데이터 파이프라인 스크립트 (런타임 불필요)
-download.py
-parse_pdfs.py
-build_qa_vectordb.py
-csm_catalog.py
-check_law_names.py
-test.py
-
-# 스크린샷
-image*.png
-users.db
+# 원본 데이터 / 파이프라인 / 평가 (런타임에 불필요)
+data/
+scripts/
+eval/

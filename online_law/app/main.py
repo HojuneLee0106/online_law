@@ -3,7 +3,6 @@ import json
 import os
 import secrets
 import uuid
-import db
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import StreamingResponse
@@ -12,7 +11,8 @@ from pydantic import BaseModel
 import time
 from langchain_core.messages import HumanMessage, AIMessage
 
-from graph import build_rag_graph
+from app import db
+from app.graph import build_rag_graph
 
 load_dotenv()
 PASSCODE=os.getenv("PASSCODE","")

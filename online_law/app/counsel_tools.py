@@ -12,7 +12,7 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_core.tools import tool
  
-QA_PERSIST_DIR = "./chroma_qa"
+QA_PERSIST_DIR = "./var/chroma_qa"
 QA_COLLECTION = "life_law"
  
 # 생활법령 대분류(카테고리) — search_qa의 category 필터 값

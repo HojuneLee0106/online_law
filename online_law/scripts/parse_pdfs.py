@@ -26,13 +26,15 @@
 import json
 import os
 import re
- 
+from pathlib import Path
+
 import pdfplumber
- 
-PDF_DIR = "pdfs"
-CATALOG_PATH = "csm_catalog.json"
-OUT_PATH = "qa_documents.json"
-REPORT_PATH = "parse_report.txt"
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+PDF_DIR = DATA_DIR / "pdfs"
+CATALOG_PATH = DATA_DIR / "csm_catalog.json"
+OUT_PATH = DATA_DIR / "qa_documents.json"
+REPORT_PATH = DATA_DIR / "parse_report.txt"
  
 DISCLAIMER_START = "이 정보는"
 DISCLAIMER_END = "국민 신문고에 문의하시기 바랍니다."

@@ -22,8 +22,8 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 import aiosqlite
-from counsel_tools import build_counsel_tools
-from vectordb import load_vectorstore
+from app.counsel_tools import build_counsel_tools
+from app.vectordb import load_vectorstore
 
 
 load_dotenv()
@@ -246,7 +246,7 @@ def build_rag_graph(variant: str = "current", use_checkpointer: bool = True):
     checkpointer = None
     if use_checkpointer:
         checkpointer = AsyncSqliteSaver(
-            aiosqlite.connect("checkpoints.db", check_same_thread=False)
+            aiosqlite.connect("var/checkpoints.db", check_same_thread=False)
         )
 
     # ── variant: single (라우팅 없는 단일 에이전트) ──

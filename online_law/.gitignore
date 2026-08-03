@@ -6,21 +6,10 @@
 __pycache__/
 *.pyc
 
-# 런타임 생성물
-checkpoints.db
-checkpoints.db-shm
-checkpoints.db-wal
-chroma_persist_manifest.json
+# 런타임 상태 (DB, 벡터DB) — EC2 볼륨 마운트로 제공
+var/
 
-# 벡터DB (EC2 볼륨으로 분리)
-chroma_persist/
-chroma_qa/
-
-# 원본 데이터 / 중간 산출물 (로컬에서만 사용)
-pdfs/
-qa_documents.json
-parse_report.txt
-
-# 스크린샷
-image*.png
-users.db
+# 원본 데이터 / 중간 산출물 (로컬 파이프라인에서만 사용)
+data/pdfs/
+data/qa_documents.json
+data/parse_report.txt

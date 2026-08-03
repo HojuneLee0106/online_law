@@ -28,7 +28,6 @@ jobs:
         with:
           context: ./online_law  
           push: true
-          no-cache: true
           tags: ghcr.io/hojunelee0106/online_law:latest
 
   deploy:
@@ -46,13 +45,14 @@ jobs:
             docker pull ghcr.io/hojunelee0106/online_law:latest
             docker stop online-law || true
             docker rm online-law || true
+            docker image prune -af
             docker run -d --name online-law \
               --restart unless-stopped \
               -p 8000:8000 \
-              -v /home/ubuntu/chroma_data/chroma_persist:/app/chroma_persist \
-              -v /home/ubuntu/chroma_data/chroma_qa:/app/chroma_qa \
-              -v /home/ubuntu/app_data/users.db:/app/users.db \
-              -v /home/ubuntu/app_data/checkpoints.db:/app/checkpoints.db \
+              -v /home/ubuntu/chroma_data/chroma_persist:/app/var/chroma_persist \
+              -v /home/ubuntu/chroma_data/chroma_qa:/app/var/chroma_qa \
+              -v /home/ubuntu/app_data/users.db:/app/var/users.db \
+              -v /home/ubuntu/app_data/checkpoints.db:/app/var/checkpoints.db \
               -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
               -e ANTHROPIC_MODEL="claude-haiku-4-5" \
               -e LLM_PROVIDER="anthropic" \

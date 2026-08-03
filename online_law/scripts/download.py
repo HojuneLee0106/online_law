@@ -17,9 +17,11 @@ import os
 import time
 import urllib.request
 import urllib.error
- 
-CATALOG_PATH = "csm_catalog.json"
-OUT_DIR = "pdfs"
+from pathlib import Path
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+CATALOG_PATH = DATA_DIR / "csm_catalog.json"
+OUT_DIR = DATA_DIR / "pdfs"
 BASE_URL = "https://www.easylaw.go.kr/CSP/FileDownload.laf"
 DELAY_SEC = 1.0          # 요청 간 대기 (서버 예의)
 TIMEOUT = 60

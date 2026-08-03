@@ -6,7 +6,7 @@ from contextlib import contextmanager
 
 import bcrypt
 
-DB_PATH = "users.db"
+DB_PATH = "var/users.db"
 
 
 @contextmanager

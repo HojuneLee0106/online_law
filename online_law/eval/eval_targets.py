@@ -1,7 +1,12 @@
 """각 variant를 실행해 답변·사용도구·라우팅을 추출하는 target 함수."""
+import sys
 import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
-from graph import build_rag_graph
+from app.graph import build_rag_graph
 
 # variant별 그래프를 미리 빌드 (checkpointer 없이 - 평가는 독립 실행)
 _graphs = {}
