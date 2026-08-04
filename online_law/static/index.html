@@ -36,6 +36,7 @@
     #auth .msg { font-size: 13px; margin-top: 12px; min-height: 18px; }
     #auth .msg.error { color: var(--danger); }
     #auth .msg.ok { color: #2a8; }
+    #auth .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
     #sidebar { width: 260px; background: var(--sidebar); color: #e6e8ee;
       display: flex; flex-direction: column; flex-shrink: 0; }
     #sidebar .top { padding: 16px; }
@@ -68,6 +69,10 @@
     .msg.bot .bubble { background: var(--bot-bubble); color: var(--text); border-bottom-left-radius: 4px; max-width: 85%; }
     .msg.bot .bubble.pending::after { content: "▋"; animation: blink 1s steps(2) infinite; color: var(--muted); }
     @keyframes blink { 0%,50%{opacity:1;} 50.01%,100%{opacity:0;} }
+    .msg.bot .bubble.status { color: var(--muted); font-style: italic; }
+    .msg.bot .bubble.status::after { content: ""; animation: none; }
+    .status-dots::after { content: "·"; animation: dots 1.2s steps(4) infinite; }
+    @keyframes dots { 0%{content:"·";} 25%{content:"··";} 50%{content:"···";} 75%{content:"";} }
     .empty-hint { text-align: center; color: var(--muted); font-size: 13px; margin: auto; }
     footer { padding: 14px 20px; background: var(--panel); border-top: 1px solid var(--line); flex-shrink: 0; }
     .input-row { max-width: 780px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
@@ -89,6 +94,11 @@
       <input id="au" autocomplete="username" />
       <label for="ap">비밀번호</label>
       <input id="ap" type="password" autocomplete="current-password" />
+      <div id="passWrap" style="display:none">
+        <label for="apc">초대 코드</label>
+        <input id="apc" autocomplete="off" />
+        <div class="hint">가입에는 초대 코드가 필요합니다.</div>
+      </div>
       <button class="primary" id="authBtn">로그인</button>
       <div class="toggle" id="toggleWrap">계정이 없으신가요? <a id="toggleLink">회원가입</a></div>
       <div class="msg" id="authMsg"></div>
@@ -121,6 +131,8 @@
     const authEl = document.getElementById("auth");
     const auInput = document.getElementById("au");
     const apInput = document.getElementById("ap");
+    const apcInput = document.getElementById("apc");
+    const passWrap = document.getElementById("passWrap");
     const authBtn = document.getElementById("authBtn");
     const toggleWrap = document.getElementById("toggleWrap");
     const authMsg = document.getElementById("authMsg");
@@ -132,6 +144,7 @@
 
     function setMode(m) {
       mode = m; authMsg.textContent = "";
+      passWrap.style.display = m === "register" ? "block" : "none";
       if (m === "login") {
         authBtn.textContent = "로그인";
         toggleWrap.innerHTML = '계정이 없으신가요? <a id="toggleLink">회원가입</a>';
@@ -149,9 +162,10 @@
         if (mode === "register") {
           const res = await fetch(API + "/api/register", {
             method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: u, password: p }) });
+            body: JSON.stringify({ username: u, password: p, passcode: apcInput.value.trim() }) });
           const data = await res.json();
           if (!res.ok) { showAuthMsg(data.detail || "가입 실패", "error"); return; }
+          apcInput.value = "";
           showAuthMsg("가입 완료! 로그인하세요.", "ok"); setMode("login");
         } else {
           const res = await fetch(API + "/api/login", {
@@ -258,6 +272,17 @@
         if (!res.ok) { botBubble.classList.remove("pending"); botBubble.textContent = "오류: 서버 응답 " + res.status; return; }
         const reader = res.body.getReader(); const decoder = new TextDecoder();
         let buffer = "", answer = "";
+        const statuses = new Set();   // 이번 응답에서 진행 중인 작업 안내
+        // 도구가 아직 안 돌았으면 일반 안내를 보여준다(빈 말풍선 방지)
+        const renderStatus = () => {
+          botBubble.classList.add("status");
+          botBubble.innerHTML = "";
+          botBubble.append(statuses.size ? [...statuses].join(" · ") : "질문을 살펴보는 중입니다");
+          const d = document.createElement("span");
+          d.className = "status-dots";
+          botBubble.append(d);
+          chat.scrollTop = chat.scrollHeight;
+        };
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -271,14 +296,25 @@
             try {
               const obj = JSON.parse(payload);
               if (obj.thread_id) threadId = obj.thread_id;
-              if (obj.reset) { answer = ""; botBubble.textContent = ""; }
-              if (obj.token) { answer += obj.token; botBubble.textContent = answer; chat.scrollTop = chat.scrollHeight; }
-              if (obj.error) { answer += "\n[오류] " + obj.error; botBubble.textContent = answer; }
+              // 도구 호출 턴이었으므로 지금까지 찍힌 텍스트를 버린다.
+              // 빈 말풍선이 남지 않도록 곧바로 진행 상황을 보여준다.
+              if (obj.reset) { answer = ""; renderStatus(); }
+              // 도구는 병렬 실행되므로 동시에 도는 작업을 함께 보여준다.
+              // 답변 토큰이 나오기 시작하면 표시하지 않는다.
+              if (obj.status && !answer) { statuses.add(obj.status); renderStatus(); }
+              if (obj.token) {
+                if (!answer) { statuses.clear(); botBubble.classList.remove("status"); botBubble.textContent = ""; }
+                answer += obj.token; botBubble.textContent = answer; chat.scrollTop = chat.scrollHeight;
+              }
+              if (obj.error) {
+                botBubble.classList.remove("status");
+                answer += "\n[오류] " + obj.error; botBubble.textContent = answer;
+              }
             } catch (_) {}
           }
         }
         botBubble.classList.remove("pending");
-        if (!answer) botBubble.textContent = "(응답이 비어 있습니다)";
+        if (!answer) { botBubble.classList.remove("status"); botBubble.textContent = "(응답이 비어 있습니다)"; }
         if (isNew) loadConversations();
       } catch (e) { botBubble.classList.remove("pending"); botBubble.textContent = "오류: " + e.message; }
       finally { sendBtn.disabled = false; q.focus(); }

@@ -22,6 +22,14 @@ PASSCODE=os.getenv("PASSCODE","")
 # 도구 라운드 1회당 superstep 2개 + 그래프 진입 오버헤드를 감안한 값.
 RECURSION_LIMIT=int(os.getenv("GRAPH_RECURSION_LIMIT", "16"))
 
+# 도구 실행 중 사용자에게 보여줄 안내. 첫 토큰까지 20초 안팎 걸리므로
+# 무엇을 하고 있는지 알려주어 대기 체감을 줄인다.
+TOOL_STATUS = {
+    "search_law": "관련 법조문을 찾는 중입니다",
+    "search_case": "판례를 검토하는 중입니다",
+    "search_qa": "생활법령 자료를 확인하는 중입니다",
+}
+
 def content_to_text(content)->str:
     if isinstance(content,str):
         return content
@@ -62,6 +70,7 @@ def get_current_user(authorization: str = Header(default="")) -> int:
 class RegisterRequest(BaseModel):
     username: str
     password: str
+    passcode: str = ""
 
 class LoginRequest(BaseModel):
     username: str
@@ -69,6 +78,10 @@ class LoginRequest(BaseModel):
 
 @app.post("/api/register")
 def register(req: RegisterRequest):
+    # 지인만 가입할 수 있도록 초대 코드로 가입을 막는다.
+    # PASSCODE 가 비어 있으면(로컬 개발) 검사하지 않는다.
+    if not check_passcode(req.passcode):
+        raise HTTPException(status_code=403, detail="초대 코드가 올바르지 않습니다.")
     ok, msg = db.register_user(req.username, req.password)
     if not ok:
         raise HTTPException(status_code=400, detail=msg)
@@ -82,10 +95,10 @@ def login(req: LoginRequest):
     return {"token": token}
 
 def check_passcode(passcode: str)->bool:
-    return not PASSCODE or secrets.compare_digest(passcode, PASSCODE)
-def require_passcode(x_passcode: str=Header(default="")):
-    if not check_passcode(x_passcode):
-        raise HTTPException(status_code=401, detail="Invalid passcode")
+    """PASSCODE 미설정 시(로컬 개발) 항상 통과. 비교는 타이밍 공격에 안전하게."""
+    if not PASSCODE:
+        return True
+    return secrets.compare_digest((passcode or "").encode(), PASSCODE.encode())
 @app.post("/api/query/stream")
 async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_user)):
     thread_id = req.thread_id or str(uuid.uuid4())
@@ -121,7 +134,12 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
                     continue
 
                 kind = event["event"]
-                if kind == "on_chat_model_stream":
+                if kind == "on_tool_start":
+                    # 첫 토큰까지 몇 초 걸리므로 무엇을 하는 중인지 알려준다
+                    label = TOOL_STATUS.get(event.get("name"))
+                    if label:
+                        yield sse({"status": label})
+                elif kind == "on_chat_model_stream":
                     chunk = event["data"]["chunk"]
                     if getattr(chunk, "tool_call_chunks", None):
                         # 이 턴은 최종 답변이 아니라 도구 호출 턴이었다
