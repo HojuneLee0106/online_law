@@ -8,6 +8,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from app.graph import build_rag_graph
 
+
+def extract_retrieved(messages):
+    """도구가 돌려준 검색 결과를 모두 이어붙인다.
+
+    citation_grounding 평가자가 '답변이 인용한 조문·사건번호가 실제로 검색된
+    자료에 있었는지'를 대조하는 데 쓴다. 이게 없으면 모델이 기억으로 지어낸
+    조문과 검색으로 확인한 조문을 구분할 수 없다.
+    """
+    return "\n\n".join(
+        str(m.content) for m in messages if isinstance(m, ToolMessage)
+    )
+
 # variant별 그래프를 미리 빌드 (checkpointer 없이 - 평가는 독립 실행)
 _graphs = {}
 
@@ -66,6 +78,7 @@ def make_target(variant):
             "tools_used": tools_used,
             "route": route,
             "latency_sec": round(elapsed, 2),
+            "retrieved": extract_retrieved(messages),
         }
 
     return target

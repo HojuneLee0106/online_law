@@ -1,8 +1,9 @@
-"""평가자 3종: 라우팅 정확도, 도구 사용 적절성, 품질(LLM-judge)."""
+"""평가자: 라우팅 정확도, 도구 사용 적절성, 인용 근거성, 품질(LLM-judge)."""
 import os
+import re
 from langchain_anthropic import ChatAnthropic
 from dotenv import load_dotenv
-load_dotenv() 
+load_dotenv()
 # ── (a) 라우팅 정확도 ──
 def routing_accuracy(outputs: dict, reference_outputs: dict) -> dict:
     expected = reference_outputs.get("expected_route")
@@ -35,6 +36,94 @@ def tool_precision(outputs: dict, reference_outputs: dict) -> dict:
         return {"key": "tool_precision", "score": None}
     hit = len(expected & actual) / len(actual)
     return {"key": "tool_precision", "score": round(hit, 2)}
+
+# ── (b-3) 인용 근거성 ──
+# LLM-judge 는 조문 번호나 형량 수치가 검색 결과와 일치하는지를 안정적으로
+# 잡아내지 못한다(실측: rubric 요구 항목이 0/3 -> 3/3 이 되었는데 judge 점수는
+# 오히려 내려갔다). 그래서 규칙으로 직접 센다.
+#
+# 법령명이 앞에 붙은 조문만 센다. 앞의 (?<![가-힣]) 는 "이를 위반하면 동물보호법"
+# 처럼 앞 단어가 법령명에 딸려 들어가는 것을 막는다.
+LAW_ARTICLE_RE = re.compile(
+    r'(?<![가-힣])([가-힣ㆍ·]{1,20}법(?:률)?)[」]?\s*제\s*(\d+)\s*조(?:\s*의\s*(\d+))?'
+)
+CASE_NO_RE = re.compile(r'\b(\d{4}[가-힣]{1,3}\d+)\b')
+# 조문 토큰 주변에서 법령명을 찾을 범위. 검색 결과는 "[출처: 도로교통법 제148조의2
+# (벌칙)]" 처럼 법령명과 조문이 붙어 나오지만, 생활법령은 "…에 처해집니다
+# (「동물보호법」 제97조제1항제1호)" 처럼 떨어져 있어 여유를 둔다.
+_CITE_WINDOW = 150
+
+
+def _extract_citations(text: str) -> list[tuple[str, str, str]]:
+    """답변에서 (종류, 법령명, 토큰) 인용 목록을 중복 없이 추출."""
+    found = []
+    for m in LAW_ARTICLE_RE.finditer(text):
+        law = re.sub(r'\s+', '', m.group(1))
+        article = f"제{m.group(2)}조" + (f"의{m.group(3)}" if m.group(3) else "")
+        found.append(("law", law, article))
+    for m in CASE_NO_RE.finditer(text):
+        found.append(("case", "", m.group(1)))
+    return list(dict.fromkeys(found))
+
+
+def _is_grounded(kind: str, law: str, token: str, retrieved: str) -> bool:
+    """그 인용이 검색 결과에 실제로 있었는지."""
+    if kind == "case":
+        return token in retrieved
+    # 공백을 지워서 "제 148 조의 2" 같은 표기 차이를 흡수한다
+    flat = re.sub(r'\s+', '', retrieved)
+    return any(
+        law[:4] in flat[max(0, m.start() - _CITE_WINDOW): m.end() + 80]
+        for m in re.finditer(re.escape(token), flat)
+    )
+
+
+def citation_grounding(outputs: dict) -> dict:
+    """답변이 인용한 조문·사건번호 중 검색 결과에 실제로 있던 비율.
+
+    1.0 이면 인용이 전부 검색으로 확인된 것이고, 낮을수록 모델이 기억에
+    의존해 조문 번호를 지어낸 것이다. 인용이 하나도 없으면 채점하지 않는다
+    (인용을 아예 안 한 답변이 1.0 을 받아서는 안 된다).
+    """
+    answer = outputs.get("answer", "")
+    retrieved = outputs.get("retrieved", "")
+    if not retrieved:
+        return {"key": "citation_grounding", "score": None,
+                "comment": "검색 결과 없음"}
+    citations = _extract_citations(answer)
+    if not citations:
+        return {"key": "citation_grounding", "score": None, "comment": "인용 없음"}
+    ungrounded = [f"{law} {tok}".strip()
+                  for kind, law, tok in citations
+                  if not _is_grounded(kind, law, tok, retrieved)]
+    score = 1 - len(ungrounded) / len(citations)
+    return {
+        "key": "citation_grounding",
+        "score": round(score, 2),
+        "comment": (f"{len(citations)}건 중 미근거 {len(ungrounded)}건: "
+                    f"{', '.join(ungrounded)}" if ungrounded
+                    else f"{len(citations)}건 전부 검색 결과에 존재"),
+    }
+
+
+def citation_recall(outputs: dict, reference_outputs: dict) -> dict:
+    """정답 조문·법정형(expected_citations)을 답변이 실제로 담았는지.
+
+    judge 가 놓치는 '조문 번호와 법정형이 있는가'를 문자열로 직접 확인한다.
+    데이터셋에 expected_citations 가 없는 문항은 채점하지 않는다.
+    """
+    expected = reference_outputs.get("expected_citations") or []
+    if not expected:
+        return {"key": "citation_recall", "score": None}
+    answer = re.sub(r'\s+', '', outputs.get("answer", ""))
+    missing = [e for e in expected if re.sub(r'\s+', '', e) not in answer]
+    score = 1 - len(missing) / len(expected)
+    return {
+        "key": "citation_recall",
+        "score": round(score, 2),
+        "comment": f"누락: {', '.join(missing)}" if missing else "전부 포함",
+    }
+
 
 # ── (c) 품질 LLM-judge ──
 _judge = ChatAnthropic(
