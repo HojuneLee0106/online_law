@@ -162,9 +162,10 @@ uv run uvicorn app.main:app --reload
 | 변수 | 기본값 | 설명 |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | — | 필수 (Claude 사용 시) |
-| `ANTHROPIC_MODEL` | `claude-sonnet-4-6` | 운영은 `claude-haiku-4-5` |
+| `ANTHROPIC_MODEL` | `claude-sonnet-4-6` | 운영은 `claude-sonnet-5` |
 | `LLM_PROVIDER` | `anthropic` | `google`로 바꾸면 Gemini 사용 |
-| `LLM_TEMPERATURE` | `0` | 법률 답변 일관성을 위해 0 고정 |
+| `LLM_TEMPERATURE` | `0` | 법률 답변 일관성을 위해 0 고정. Sonnet 5 이후 세대는 비기본값을 거부하므로 자동으로 미적용 |
+| `LLM_EFFORT` | (미지정) | `low`/`medium`/`high` — Sonnet 5 이후 세대만 적용 |
 | `LAW_API_OC` | — | 국가법령정보센터 Open API 인증키 |
 | `GRAPH_RECURSION_LIMIT` | `16` | 도구 루프 하드 상한 |
 | `CHROMA_PERSIST_DIR` | `./var/chroma_persist` | 법령/판례 벡터DB |
@@ -225,12 +226,18 @@ uv run python eval/run_eval_single.py         # 3회 반복 평가
 
 ### 현재 성능 (문항당 3회 반복)
 
-| 지표 | 값 |
-|---|---|
-| tool_usage (recall) | **1.000** |
-| tool_precision | **0.917** |
-| answer_quality | **0.787** |
-| latency (로컬) | 9.49s |
+운영 구성(`claude-sonnet-5` + `effort=low`) 기준입니다.
+
+| 지표 | Haiku 4.5 | Sonnet 5 | **Sonnet 5 + low** |
+|---|---:|---:|---:|
+| tool_usage (recall) | 1.000 | 1.000 | **1.000** |
+| tool_precision | 0.917 | 0.663 | **0.696** |
+| answer_quality | 0.787 | 0.915 | **0.903** |
+| latency (로컬) | 9.5s | 33.3s | **20.5s** |
+
+모델 교체가 가장 큰 폭의 개선이었습니다. 검색 인프라 개선(판례 29배 확대, 조문 인용 수정)이 0.756 → 0.787이었던 반면, 모델 교체만으로 0.787 → 0.915가 되었습니다. `effort=low`는 품질 손실이 측정 편차(0.056) 안쪽인 반면 지연을 38% 줄여 채택했습니다.
+
+`tool_precision` 하락은 Sonnet 5가 도구를 더 많이 호출하기 때문입니다. recall이 1.000이고 품질이 전 문항 상승했으므로 과잉 검색이 결과를 해치지는 않으며, 데이터셋의 `expected_tools`가 최소 집합 기준이라는 측면도 있습니다.
 
 문항 내 편차는 평균 0.062, 문항 간 표준편차는 0.127입니다. **품질을 좌우하는 것은 실행 편차가 아니라 문항 자체**이며, 개선 효과를 판단하려면 반복 측정이 필수입니다.
 
@@ -354,9 +361,11 @@ ssh -i <key.pem> ubuntu@<host> "docker start online-law"
 
 ### 답변 품질이 검색 개선을 따라오지 못함
 
-판례를 107건 → 3,138건으로 29배 늘리고 조문 인용 정확성을 고쳤는데도 `answer_quality`는 0.756 → 0.787로 소폭 상승에 그쳤습니다. 도구 선택(recall 1.000)과 근거 정확성은 확보됐으므로, 남은 병목은 **확보된 자료로 답을 구성하는 모델의 능력**으로 보입니다.
+판례를 107건 → 3,138건으로 29배 늘리고 조문 인용 정확성을 고쳤는데도 `answer_quality`는 0.756 → 0.787로 소폭 상승에 그쳤습니다. 도구 선택(recall 1.000)과 근거 정확성은 확보됐으므로, 남은 병목은 **확보된 자료로 답을 구성하는 모델의 능력**이라고 판단했습니다.
 
-현재 운영 모델은 `claude-haiku-4-5`입니다. 상위 모델 검증이 다음 단계입니다.
+`claude-haiku-4-5` → `claude-sonnet-5` 교체로 이 가설이 확인되었습니다. **10문항 전부 품질이 올라** 0.787 → 0.915가 되었습니다. 검색 인프라를 아무리 개선해도 모델이 자료를 활용하지 못하면 한계가 있다는 것이 이번 프로젝트에서 가장 분명하게 확인된 사실입니다.
+
+교체 시 API 차이 두 가지를 처리해야 했습니다. Sonnet 5 이후 세대는 **비기본값 `temperature`를 400으로 거부**하고, **thinking이 기본으로 켜지면서** 응답에 실린 빈 thinking 블록을 도구 루프에서 되돌려 보낼 때 `thinking.thinking: Field required` 400이 납니다. `build_llm`에서 모델별로 분기해 해결했습니다.
 
 ### LLM-judge의 한계
 

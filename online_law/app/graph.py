@@ -140,25 +140,48 @@ COUNSEL_PROMPT = (
 )
 
 
+# temperature 를 받지 않는 모델. Claude Sonnet 5 이후 세대는 비기본값
+# temperature/top_p/top_k 를 400 으로 거부한다(값을 넘기면 요청 자체가 실패).
+# 이 모델들은 대신 프롬프트로 일관성을 확보한다.
+NO_TEMPERATURE_MODELS = ("claude-sonnet-5", "claude-opus-5", "claude-opus-4-7",
+                         "claude-opus-4-8", "claude-fable-5", "claude-mythos-5")
+
+
 def build_llm():
     provider=os.getenv("LLM_PROVIDER", "anthropic").lower()
     # 법률 답변은 같은 질문에 같은 근거·결론이 나와야 하므로 기본값을 0으로 둔다.
     # (미지정 시 Anthropic 기본값은 1.0이라 실행마다 답이 크게 달라진다)
     temperature=float(os.getenv("LLM_TEMPERATURE", "0"))
-    print(f"LLM Provider:{provider} (temperature={temperature})")
     if provider == "anthropic":
+        model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+        kwargs={}
+        effort=os.getenv("LLM_EFFORT", "")
+        if model.startswith(NO_TEMPERATURE_MODELS):
+            # 이 세대는 thinking 이 기본으로 켜지는데, 응답에 실린 빈 thinking 블록을
+            # 도구 루프에서 되돌려 보낼 때 400(thinking.thinking: Field required)이 난다.
+            # 도구 기반 RAG 에는 thinking 이 필요치 않으므로 끈다.
+            kwargs["thinking"]={"type": "disabled"}
+            # effort 는 응답 길이·도구 사용량을 함께 조절한다. 미지정 시 모델 기본값(high).
+            if effort:
+                kwargs["model_kwargs"]={"output_config": {"effort": effort}}
+        else:
+            kwargs["temperature"]=temperature
+        print(f"LLM Provider:{provider} model={model} "
+              f"temperature={kwargs.get('temperature', '미지정')} "
+              f"thinking={kwargs.get('thinking', {}).get('type', '기본')} "
+              f"effort={effort or '기본'}")
         return ChatAnthropic(
-            model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
+            model=model,
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
             streaming=True,
-            temperature=temperature,
+            **kwargs,
         )
-    else:
-        return ChatGoogleGenerativeAI(
-            model=os.getenv("GOOGLE_MODEL","gemini-2.5-flash"),
-            google_api_key=os.getenv("GOOGLE_API_KEY"),
-            temperature=temperature,
-            )
+    print(f"LLM Provider:{provider} (temperature={temperature})")
+    return ChatGoogleGenerativeAI(
+        model=os.getenv("GOOGLE_MODEL","gemini-2.5-flash"),
+        google_api_key=os.getenv("GOOGLE_API_KEY"),
+        temperature=temperature,
+        )
 
 def format_docs(docs: list[Document])->str:
     parts=[]
