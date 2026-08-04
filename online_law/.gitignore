@@ -1,6 +1,7 @@
 .venv/
 .env
 .DS_Store
+.claude/
 
 # 파이썬
 __pycache__/

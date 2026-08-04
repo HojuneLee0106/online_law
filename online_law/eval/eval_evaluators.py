@@ -25,6 +25,17 @@ def tool_usage(outputs: dict, reference_outputs: dict) -> dict:
     hit = len(expected & actual) / len(expected)
     return {"key": "tool_usage", "score": round(hit, 2)}
 
+# ── (b-2) 과잉 검색 여부 (precision) ──
+def tool_precision(outputs: dict, reference_outputs: dict) -> dict:
+    """실제 호출한 도구 중 기대 도구의 비율. 불필요한 도구까지 부르면 낮아진다."""
+    expected = set(reference_outputs.get("expected_tools", []))
+    actual = set(outputs.get("tools_used", []))
+    if not expected or not actual:
+        # 아예 도구를 안 쓴 경우는 tool_usage(recall)가 0으로 잡으므로 여기선 스킵
+        return {"key": "tool_precision", "score": None}
+    hit = len(expected & actual) / len(actual)
+    return {"key": "tool_precision", "score": round(hit, 2)}
+
 # ── (c) 품질 LLM-judge ──
 _judge = ChatAnthropic(
     model="claude-sonnet-4-6",
