@@ -97,17 +97,34 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
 
     async def event_stream():
         yield sse({"thread_id": thread_id})
+        # 이번 LLM 턴에서 사용자에게 이미 내보낸 토큰이 있는지.
+        # 도구 호출 턴으로 판명되면 reset을 보내 프론트에서 폐기하게 한다.
+        sent_in_turn = False
         try:
             async for event in app.state.rag_graph.astream_events(
                 {"messages": [HumanMessage(content=req.question)]},
                 config={"configurable": {"thread_id": thread_id}},
                 version="v2",
             ):
-                if event["event"] == "on_chat_model_stream":
+                # 요약 노드의 LLM 출력은 내부용이므로 사용자에게 보내지 않는다
+                if event.get("metadata", {}).get("langgraph_node") == "summarize":
+                    continue
+
+                kind = event["event"]
+                if kind == "on_chat_model_stream":
                     chunk = event["data"]["chunk"]
+                    if getattr(chunk, "tool_call_chunks", None):
+                        # 이 턴은 최종 답변이 아니라 도구 호출 턴이었다
+                        if sent_in_turn:
+                            yield sse({"reset": True})
+                            sent_in_turn = False
+                        continue
                     token = content_to_text(chunk.content)
                     if token:
+                        sent_in_turn = True
                         yield sse({"token": token})
+                elif kind == "on_chat_model_end":
+                    sent_in_turn = False
         except Exception as e:
             yield sse({"error": str(e)})
         yield "data: [DONE]\n\n"

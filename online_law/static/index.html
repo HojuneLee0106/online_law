@@ -271,6 +271,7 @@
             try {
               const obj = JSON.parse(payload);
               if (obj.thread_id) threadId = obj.thread_id;
+              if (obj.reset) { answer = ""; botBubble.textContent = ""; }
               if (obj.token) { answer += obj.token; botBubble.textContent = answer; chat.scrollTop = chat.scrollHeight; }
               if (obj.error) { answer += "\n[오류] " + obj.error; botBubble.textContent = answer; }
             } catch (_) {}
