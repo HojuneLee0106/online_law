@@ -24,6 +24,12 @@ load_dotenv()
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./var/chroma_persist")
 MANIFEST_PATH = os.getenv("MANIFEST_PATH", "./var/chroma_persist_manifest.json")
 
+# 법령 Document의 메타데이터 스키마 버전.
+# 스키마가 바뀌면 이 값을 올려서 기존 법령을 강제로 재임베딩한다
+# (법령 자체가 개정되지 않으면 mst/efYd가 그대로라 스킵되기 때문).
+#   v2: 조문가지번호를 반영해 제148조의2 형태로 출처 표기
+LAW_SCHEMA_VERSION = "v2"
+
 DOMAIN_CASE_TYPES = {
     "criminal": {"형사"},
     "housing": {"민사"},
@@ -67,16 +73,25 @@ def save_manifest(manifest: dict) -> None:
 def build_embeddings():
     return HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
 
-def precedent_to_documents(law_name: str, domain: str) -> list[Document]:
-    """참조법령명(JO) 기준 대법원 판례를 본문조회하여 Document 리스트로 변환."""
+def precedent_to_documents(
+    law_name: str, domain: str, skip_prec_ids: set | None = None
+) -> list[Document]:
+    """참조법령명(JO) 기준 대법원 판례를 본문조회하여 Document 리스트로 변환.
+
+    skip_prec_ids: 이미 적재된 판례일련번호. 본문조회 전에 걸러내 불필요한
+    API 호출을 막는다 (본문조회는 건당 요청 + 대기가 있어 재실행 비용이 크다).
+    """
     items = search_precedents_by_law(law_name, PRECEDENT_START_DATE, PRECEDENT_END_DATE, supreme_only=True)
     allowed_types=DOMAIN_CASE_TYPES.get(domain, set())
+    skip_prec_ids=skip_prec_ids or set()
     docs = []
     for item in items:
         if allowed_types and item.get("사건종류명") not in allowed_types:
             continue
 
         prec_id = item.get("판례일련번호")
+        if str(prec_id) in skip_prec_ids:
+            continue
         case_name = item.get("사건명", "")
         case_no = item.get("사건번호", "")
         court = item.get("법원명", "")
@@ -156,7 +171,13 @@ def law_to_documents(law_name: str, domain: str) -> tuple[list[Document], str | 
         if not content:
             continue
         
+        # 개정으로 추가된 조문은 '조문번호'와 '조문가지번호'로 나뉘어 온다.
+        # (예: 제148조의2 -> 조문번호=148, 조문가지번호=2)
+        # 가지번호를 빼먹으면 제148조/제148조의2/제148조의3이 모두
+        # '제148조'가 되어 출처가 틀리고 서로 구분되지 않는다.
         jo_no=art.get("조문번호","")
+        jo_branch=art.get("조문가지번호") or ""
+        jo_label=f"제{jo_no}조의{jo_branch}" if jo_branch else f"제{jo_no}조"
         jo_title=art.get("조문제목","")
         docs.append(Document(
             page_content=content,
@@ -165,10 +186,12 @@ def law_to_documents(law_name: str, domain: str) -> tuple[list[Document], str | 
                 "domain": domain,
                 "law_name": law_name,
                 "article_no": jo_no,
+                "article_branch_no": jo_branch,
+                "article_label": jo_label,
                 "article_title": jo_title,
                 "mst": mst,
                 "efYd": efYd,
-                "source": f"{law_name} 제{jo_no}조" + (f"({jo_title})" if jo_title else ""),
+                "source": f"{law_name} {jo_label}" + (f"({jo_title})" if jo_title else ""),
             },
         ))
     return docs, mst, efYd
@@ -187,7 +210,7 @@ def build_domain(domain: str, vectorstore, manifest: dict, splitter) -> None:
         law_docs, mst, efYd=law_to_documents(law_name, domain)
         if law_docs:
             manifest_key=f"law:{domain}:{law_name}"
-            version_key=f"{mst}:{efYd}"
+            version_key=f"{LAW_SCHEMA_VERSION}:{mst}:{efYd}"
             if manifest.get(manifest_key)!=version_key:
                 vectorstore.delete(where={"$and": [
                     {"law_name": {"$eq": law_name}},
@@ -200,13 +223,15 @@ def build_domain(domain: str, vectorstore, manifest: dict, splitter) -> None:
                 print(f"  법령 청크 {len(split_docs)}개 저장 (MST={mst}, 시행일={efYd})")
             else:
                 print("  법령 변경 없음, 스킵")
-        case_docs=precedent_to_documents(law_name, domain)
-        new_case_docs=[]
-        for doc in case_docs:
-            manifest_key = f"case:{domain}:{doc.metadata['prec_id']}"
-            if manifest.get(manifest_key) != "done":
-                new_case_docs.append(doc)
-                manifest[manifest_key] = "done"
+        # 이미 적재된 판례는 본문조회 자체를 건너뛴다
+        done_prec_ids={
+            key.split(":", 2)[2]
+            for key, val in manifest.items()
+            if key.startswith(f"case:{domain}:") and val == "done"
+        }
+        new_case_docs=precedent_to_documents(law_name, domain, skip_prec_ids=done_prec_ids)
+        for doc in new_case_docs:
+            manifest[f"case:{domain}:{doc.metadata['prec_id']}"]="done"
         if new_case_docs:
             split_docs=splitter.split_documents(new_case_docs)
             vectorstore.add_documents(split_docs)

@@ -56,6 +56,9 @@ SUPREME_COURT_CODE = "400201"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 4
+# law.go.kr은 부하가 걸리면 정상 요청에도 간헐적으로 404를 반환한다
+# (같은 요청을 다시 보내면 200이 온다). 따라서 404도 재시도 대상에 포함한다.
+RETRYABLE_STATUS = {404, 429}
 
 
 def _get(path: str, params: dict) -> dict:
@@ -73,8 +76,9 @@ def _get(path: str, params: dict) -> dict:
         except (requests.Timeout, requests.ConnectionError) as e:
             last_err=e
         except requests.HTTPError as e:
-            # 5xx는 일시적일 수 있으므로 재시도, 4xx는 즉시 실패
-            if e.response is None or e.response.status_code < 500:
+            # 5xx와 일시적 4xx(404/429)는 재시도, 그 외 4xx는 즉시 실패
+            status=e.response.status_code if e.response is not None else None
+            if status is None or (status < 500 and status not in RETRYABLE_STATUS):
                 raise
             last_err=e
         wait=2 ** attempt
