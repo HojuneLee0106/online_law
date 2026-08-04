@@ -213,6 +213,9 @@ def build_domain(domain: str, vectorstore, manifest: dict, splitter) -> None:
             print(f"  판례 청크 {len(split_docs)}개 저장 (신규 {len(new_case_docs)}건)")
         else:
             print("  신규 판례 없음")
+        # 법령 단위로 manifest를 저장한다. 도메인 단위로 저장하면 중간에 실패했을 때
+        # 이미 적재된 청크가 manifest에 남지 않아 재실행 시 중복 적재된다.
+        save_manifest(manifest)
 
 def build_vectorstore(domains: list[str] | None = None,
                       persist_directory: str = CHROMA_PERSIST_DIR):
