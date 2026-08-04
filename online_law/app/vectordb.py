@@ -30,6 +30,9 @@ MANIFEST_PATH = os.getenv("MANIFEST_PATH", "./var/chroma_persist_manifest.json")
 #   v2: 조문가지번호를 반영해 제148조의2 형태로 출처 표기
 LAW_SCHEMA_VERSION = "v2"
 
+# Chroma의 1회 add 상한(5461)보다 작게 잡는다
+ADD_BATCH_SIZE = 5000
+
 DOMAIN_CASE_TYPES = {
     "criminal": {"형사"},
     "housing": {"민사"},
@@ -196,6 +199,13 @@ def law_to_documents(law_name: str, domain: str) -> tuple[list[Document], str | 
         ))
     return docs, mst, efYd
 
+def add_documents_in_batches(vectorstore, docs: list[Document]) -> None:
+    """Chroma는 한 번에 넣을 수 있는 문서 수에 상한(약 5461)이 있어 나눠서 적재한다.
+    민법처럼 판례가 많은 법령은 한 번에 1만 청크를 넘겨 그대로 넣으면 실패한다."""
+    for i in range(0, len(docs), ADD_BATCH_SIZE):
+        vectorstore.add_documents(docs[i:i + ADD_BATCH_SIZE])
+
+
 def build_domain(domain: str, vectorstore, manifest: dict, splitter) -> None:
     """한 도메인의 법령 + 판례를 처리."""
     law_names=LAW_DOMAINS.get(domain)
@@ -218,7 +228,7 @@ def build_domain(domain: str, vectorstore, manifest: dict, splitter) -> None:
                     {"doc_type":{"$eq":"law"}},
                 ]})
                 split_docs=splitter.split_documents(law_docs)
-                vectorstore.add_documents(split_docs)
+                add_documents_in_batches(vectorstore, split_docs)
                 manifest[manifest_key]=version_key
                 print(f"  법령 청크 {len(split_docs)}개 저장 (MST={mst}, 시행일={efYd})")
             else:
@@ -234,7 +244,7 @@ def build_domain(domain: str, vectorstore, manifest: dict, splitter) -> None:
             manifest[f"case:{domain}:{doc.metadata['prec_id']}"]="done"
         if new_case_docs:
             split_docs=splitter.split_documents(new_case_docs)
-            vectorstore.add_documents(split_docs)
+            add_documents_in_batches(vectorstore, split_docs)
             print(f"  판례 청크 {len(split_docs)}개 저장 (신규 {len(new_case_docs)}건)")
         else:
             print("  신규 판례 없음")
