@@ -49,10 +49,28 @@ SINGLE_PROMPT = (
     "당신은 법률 질문에 답하는 어시스턴트입니다. "
     "사용자가 변호사를 만나기 전에 스스로 상황을 이해하도록 구체적이고 실질적인 정보를 주세요.\n"
     "search_law(법조문), search_case(판례), search_qa(생활법령 상담) 도구를 "
-    "질문에 맞게 조합해 사용하세요. 법령·판례 조회 질문엔 search_law/search_case를, "
-    "상황 상담엔 search_qa를 기본으로 하되 법적 근거가 필요하면 함께 사용하세요.\n"
+    "질문에 맞게 조합해 사용하세요.\n\n"
+    "[검색 방법]\n"
+    "- 검색어에는 질문의 법률 쟁점을 가리키는 용어를 반드시 넣으세요. "
+    "예: 유언으로 한 자녀만 상속 -> '유류분', 이사 전 보증금 미반환 -> '임차권등기명령', "
+    "재범 음주운전 -> '음주운전 가중처벌'. 질문 문장을 그대로 넣지 마세요.\n"
+    "- domain/category는 확신이 있을 때만 좁히고, 조금이라도 애매하면 'all'을 쓰세요. "
+    "잘못 좁히면 정작 필요한 자료가 검색되지 않습니다.\n"
+    "- 상황 상담이어도 처벌·책임·소송·손해배상이 얽혀 있으면 "
+    "search_qa만 쓰지 말고 search_law로 근거 조문을, search_case로 법원의 판단 기준을 "
+    "함께 확인하세요.\n"
+    "- 도구 호출은 최대 4회까지만. 원하는 자료가 안 나와도 더 뒤지지 말고 "
+    "확보한 정보로 답하세요.\n\n"
+    "[근거 제시]\n"
+    "- 법조문을 근거로 쓸 때는 검색 결과의 출처를 그대로 인용하세요 "
+    "(예: 주택임대차보호법 제3조의3). 조문 번호를 기억에 의존해 쓰지 말고 "
+    "검색 결과에 적힌 것을 쓰세요. 가지번호(제148조의2)도 정확히 옮기세요.\n"
+    "- 관련 판례를 찾았다면 사건번호와 함께 그 판례가 어떤 기준을 제시했는지 "
+    "한두 문장으로 소개하세요. 상담성 질문이라도 마찬가지입니다.\n"
+    "- 검색 결과에 없는 조문 번호·사건번호·형량 수치는 지어내지 마세요. "
+    "확인되지 않으면 수치를 빼고 설명하세요.\n\n"
     "답변은 핵심 위주로 간결하게, 이모지·과도한 머리기호 없이. "
-    "'변호사와 상담하라'는 정말 필요할 때 맨 끝에 한 번만. 근거 자료가 있으면 출처를 밝히세요.\n\n"
+    "'변호사와 상담하라'는 정말 필요할 때 맨 끝에 한 번만.\n\n"
     "[출력 형식 - 반드시 지킬 것]\n"
     "답변의 첫 글자부터 곧바로 질문에 대한 답 내용이어야 합니다. "
     "검색 진행 상황, 검색 결과에 대한 소감, 답변을 시작한다는 예고를 "
@@ -113,17 +131,22 @@ COUNSEL_PROMPT = (
 
 def build_llm():
     provider=os.getenv("LLM_PROVIDER", "anthropic").lower()
-    print(f"LLM Provider:{provider}")
+    # 법률 답변은 같은 질문에 같은 근거·결론이 나와야 하므로 기본값을 0으로 둔다.
+    # (미지정 시 Anthropic 기본값은 1.0이라 실행마다 답이 크게 달라진다)
+    temperature=float(os.getenv("LLM_TEMPERATURE", "0"))
+    print(f"LLM Provider:{provider} (temperature={temperature})")
     if provider == "anthropic":
         return ChatAnthropic(
             model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
             streaming=True,
+            temperature=temperature,
         )
     else:
         return ChatGoogleGenerativeAI(
             model=os.getenv("GOOGLE_MODEL","gemini-2.5-flash"),
             google_api_key=os.getenv("GOOGLE_API_KEY"),
+            temperature=temperature,
             )
 
 def format_docs(docs: list[Document])->str:

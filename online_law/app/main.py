@@ -11,11 +11,16 @@ from pydantic import BaseModel
 import time
 from langchain_core.messages import HumanMessage, AIMessage
 
+from langgraph.errors import GraphRecursionError
+
 from app import db
 from app.graph import build_rag_graph
 
 load_dotenv()
 PASSCODE=os.getenv("PASSCODE","")
+# 프롬프트의 '도구 호출 최대 4회'를 넘어서도 루프가 끝나지 않을 때의 하드 상한.
+# 도구 라운드 1회당 superstep 2개 + 그래프 진입 오버헤드를 감안한 값.
+RECURSION_LIMIT=int(os.getenv("GRAPH_RECURSION_LIMIT", "16"))
 
 def content_to_text(content)->str:
     if isinstance(content,str):
@@ -103,7 +108,12 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
         try:
             async for event in app.state.rag_graph.astream_events(
                 {"messages": [HumanMessage(content=req.question)]},
-                config={"configurable": {"thread_id": thread_id}},
+                config={
+                    "configurable": {"thread_id": thread_id},
+                    # 검색 반복 상한. 프롬프트에서 도구 호출 4회로 제한하고 있으며
+                    # 이 값은 그래도 루프가 안 끝날 때를 위한 하드 백스톱이다.
+                    "recursion_limit": RECURSION_LIMIT,
+                },
                 version="v2",
             ):
                 # 요약 노드의 LLM 출력은 내부용이므로 사용자에게 보내지 않는다
@@ -125,6 +135,9 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
                         yield sse({"token": token})
                 elif kind == "on_chat_model_end":
                     sent_in_turn = False
+        except GraphRecursionError:
+            # 검색 루프가 상한에 걸린 경우. 원시 에러 대신 사람이 읽을 수 있는 안내를 보낸다.
+            yield sse({"error": "답변을 정리하지 못했습니다. 질문을 조금 더 구체적으로 나눠서 다시 물어봐 주세요."})
         except Exception as e:
             yield sse({"error": str(e)})
         yield "data: [DONE]\n\n"
