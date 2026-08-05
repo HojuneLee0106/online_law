@@ -397,6 +397,35 @@ v3에서 품질이 0.768 → 0.739로 떨어졌지만, 이는 개선이 실패�
 
 judge는 매우 일관적이므로 변동의 원인은 채점이 아니라 **에이전트의 생성**입니다. 그리고 문항 간 편차가 문항 내 편차의 2.6배이므로, **품질을 좌우하는 것은 실행 운이 아니라 문항 자체**입니다.
 
+### 3회 반복도 안전하지 않다
+
+에이전트 코드를 전혀 건드리지 않고 평가자만 추가한 뒤 12문항 × 3회를 다시 돌린 적이 있습니다. **같은 구성의 순수 재현 측정**인데 이만큼 흔들렸습니다.
+
+| 지표 | 1차 | 2차 (동일 구성) |
+|---|---:|---:|
+| answer_quality | 0.897 | 0.888 |
+| tool_usage | **0.977** | **1.000** |
+| tool_precision | 0.687 | 0.710 |
+| latency | 23.2s | 20.5s |
+
+1차의 `tool_usage` 0.977은 `law-2`와 `mix-6`이 3회 중 1회씩 `search_law`를 빠뜨린 결과였습니다. 당시 이것을 **실재하는 회귀로 판단했는데 틀렸습니다** — 같은 코드로 다시 돌리니 1.000이었습니다.
+
+지연은 더 심합니다. 같은 코드에서 20.5s와 23.2s가 나옵니다. **지연 2~3초 차이는 근거로 쓸 수 없습니다.**
+
+교훈은 이렇습니다. 3회 반복은 문항 내 편차를 보여줄 뿐 전체 평균의 안정성을 보장하지 않습니다. 특히 `tool_usage`처럼 값이 몇 개(0 / 0.5 / 0.67 / 1.0)로 뭉치는 지표는 한 번의 이탈이 평균을 크게 흔듭니다. **전체 평균이 아니라 문항별 값과 그 이유를 봐야 합니다.**
+
+### 실패한 실행을 걸러내지 않으면 지표가 거짓말을 한다
+
+평가 도중 Anthropic 워크스페이스 사용 한도가 소진돼 36실행 중 7개가 빈 응답으로 끝난 적이 있습니다.
+
+```
+BadRequestError: You have reached your specified workspace API usage limits.
+```
+
+빈 응답은 도구를 하나도 호출하지 않은 것으로 집계되어, `tool_usage`가 1.000 → 0.767로 찍혔습니다. **지표만 보면 프롬프트 수정이 도구 선택을 망가뜨린 것처럼 보입니다.** 실제로는 API가 죽은 것이었습니다.
+
+`run.error`가 있는 실행을 먼저 세고 제외한 뒤에 평균을 내야 합니다. 결과를 해석하기 전에 실패 건수를 확인하는 것이 첫 단계입니다.
+
 ### 일관성 실험
 
 temperature를 지정하지 않으면 Anthropic 기본값 1.0이 적용된다는 것을 발견하고 측정했습니다.
@@ -496,10 +525,26 @@ push → build → GHCR → EC2 (stop → rm → prune → pull → run)
 
 | 호스트 | 컨테이너 |
 |---|---|
+| `/home/ubuntu/app_data` | `/app/var` |
 | `/home/ubuntu/chroma_data/chroma_persist` | `/app/var/chroma_persist` |
 | `/home/ubuntu/chroma_data/chroma_qa` | `/app/var/chroma_qa` |
-| `/home/ubuntu/app_data/users.db` | `/app/var/users.db` |
-| `/home/ubuntu/app_data/checkpoints.db` | `/app/var/checkpoints.db` |
+
+DB는 파일이 아니라 **디렉터리를 통째로** 마운트합니다. chroma 두 개는 그 위에 겹쳐 마운트되는데, Docker가 목적지 깊이 순으로 적용하므로 중첩이 동작합니다.
+
+#### 파일 단위 마운트가 대화 이력을 날려먹었다
+
+원래는 `users.db`·`checkpoints.db`를 파일 하나씩 마운트했습니다. 이것이 **배포할 때마다 대화 내용을 지우고 있었습니다.**
+
+```
+checkpoints.db  journal_mode = wal      ← langgraph AsyncSqliteSaver 가 켠다
+users.db        journal_mode = delete   ← 평범한 sqlite3
+```
+
+WAL 모드에서 SQLite는 실제 쓰기를 옆의 `checkpoints.db-wal`에 쌓았다가 나중에 본 파일로 합칩니다. 그런데 파일 단위로 마운트하면 그 `-wal`·`-shm`이 **컨테이너 안에만** 생깁니다. 배포 스크립트의 `docker rm -f`는 SIGKILL이라 SQLite가 WAL을 합칠 틈도 없이 컨테이너가 파괴되고, 아직 합쳐지지 않은 이력이 함께 사라집니다.
+
+`users.db`는 WAL이 아니라 무사했습니다. 그래서 증상이 **"대화 목록은 그대로인데 열어보면 내용이 없다"** 였습니다. 프론트엔드의 `catch (e) {}`가 조용해서 에러도 안 보였습니다.
+
+디렉터리를 마운트하면 `-wal`이 호스트에 생겨 컨테이너가 죽어도 남습니다. 이미 소실된 이력은 복구할 수 없습니다.
 
 ### 벡터DB 갱신은 배포와 별개입니다
 

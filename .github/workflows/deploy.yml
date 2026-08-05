@@ -56,13 +56,20 @@ jobs:
             docker rm -f online-law || true
             docker image prune -af
             docker pull ghcr.io/hojunelee0106/online_law:latest
+            # DB 는 파일이 아니라 디렉터리(app_data)를 통째로 마운트한다.
+            # checkpoints.db 는 langgraph 가 journal_mode=WAL 로 열기 때문에
+            # 실제 쓰기가 옆의 -wal 파일에 쌓이는데, 파일 단위로 마운트하면
+            # 그 -wal 이 컨테이너 안에만 생긴다. 배포 때 docker rm -f 로
+            # 컨테이너를 SIGKILL 하면 아직 본 파일에 합쳐지지 않은 대화 이력이
+            # 통째로 날아갔다(대화 목록은 users.db 라 남고 내용만 사라짐).
+            # chroma 두 개는 /app/var 위에 겹쳐 마운트된다(Docker 가 목적지
+            # 깊이 순으로 적용하므로 중첩이 동작한다).
             docker run -d --name online-law \
               --restart unless-stopped \
               -p 8000:8000 \
+              -v /home/ubuntu/app_data:/app/var \
               -v /home/ubuntu/chroma_data/chroma_persist:/app/var/chroma_persist \
               -v /home/ubuntu/chroma_data/chroma_qa:/app/var/chroma_qa \
-              -v /home/ubuntu/app_data/users.db:/app/var/users.db \
-              -v /home/ubuntu/app_data/checkpoints.db:/app/var/checkpoints.db \
               -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
               -e ANTHROPIC_MODEL="claude-sonnet-5" \
               -e LLM_EFFORT="low" \
