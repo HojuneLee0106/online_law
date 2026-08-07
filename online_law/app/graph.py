@@ -283,6 +283,30 @@ def build_agent_subgraph(raw_llm, tools, system_prompt):
     sub.add_edge("tools", "agent")
     return sub.compile()
 
+def _to_transcript(messages) -> str:
+    """요약용으로 대화를 평문 대화록으로 펼친다.
+
+    잘라낸 메시지 조각을 그대로 LLM 에 넘기면 두 가지로 깨진다.
+      1. 조각의 끝이 AIMessage 면 400
+         (Sonnet 5 이후 세대는 assistant 로 끝나는 대화를 거부한다)
+      2. 조각의 끝이 도구를 호출한 AIMessage 면, 짝이 되는 ToolMessage 가
+         잘려나가 tool_use 만 남아 또 400
+    요약에는 메시지 구조가 필요 없고 내용만 있으면 되므로 평문으로 펼친다.
+    도구 호출과 검색 결과는 요약할 내용이 아니라 건너뛴다.
+    """
+    lines = []
+    for m in messages:
+        if isinstance(m, ToolMessage) or getattr(m, "tool_calls", None):
+            continue
+        text = m.content if isinstance(m.content, str) else "".join(
+            p.get("text", "") for p in m.content if isinstance(p, dict)
+        )
+        if not text.strip():
+            continue
+        lines.append(f"{'사용자' if isinstance(m, HumanMessage) else '어시스턴트'}: {text}")
+    return "\n".join(lines)
+
+
 def _make_summarizer(raw_llm):
     def summarize_messages(state: State):
         messages = state["messages"]
@@ -294,9 +318,12 @@ def _make_summarizer(raw_llm):
         old_messages = messages[:cut]
         if not old_messages:
             return {}
+        transcript = _to_transcript(old_messages)
+        if not transcript:
+            return {}
+        # 지시를 마지막 사용자 메시지에 담아, 항상 user 로 끝나게 한다
         summary = raw_llm.invoke([
-            SystemMessage(content="다음 대화를 3문장으로 요약해줘"),
-            *old_messages,
+            HumanMessage(content=f"다음 대화를 3문장으로 요약해줘.\n\n{transcript}")
         ])
         return {
             "messages": [RemoveMessage(id=m.id) for m in old_messages]

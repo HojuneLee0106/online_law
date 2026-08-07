@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import json
 import os
+import re
 import secrets
 import uuid
 from dotenv import load_dotenv
@@ -29,6 +30,21 @@ TOOL_STATUS = {
     "search_case": "판례를 검토하는 중입니다",
     "search_qa": "생활법령 자료를 확인하는 중입니다",
 }
+
+# 도구가 돌려준 검색 결과에서 출처 줄만 뽑는다.
+# 이 자료는 이미 모델 컨텍스트에 들어가 있으므로 화면에 함께 보여주는 데
+# 추가 토큰이 들지 않는다. 답변 본문에 조문이 인용되지 않은 경우에도
+# 사용자가 무엇을 근거로 답했는지 확인할 수 있다.
+SOURCE_RE = re.compile(r"\[출처: ([^\]]+)\]")
+
+
+def extract_sources(output) -> list[str]:
+    if isinstance(output, str):
+        text = output
+    else:
+        text = content_to_text(getattr(output, "content", "")) or str(output)
+    return SOURCE_RE.findall(text)
+
 
 def content_to_text(content)->str:
     if isinstance(content,str):
@@ -118,6 +134,7 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
         # 이번 LLM 턴에서 사용자에게 이미 내보낸 토큰이 있는지.
         # 도구 호출 턴으로 판명되면 reset을 보내 프론트에서 폐기하게 한다.
         sent_in_turn = False
+        sources: list[str] = []           # 검색한 자료 (중복 없이, 순서 유지)
         try:
             async for event in app.state.rag_graph.astream_events(
                 {"messages": [HumanMessage(content=req.question)]},
@@ -139,6 +156,10 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
                     label = TOOL_STATUS.get(event.get("name"))
                     if label:
                         yield sse({"status": label})
+                elif kind == "on_tool_end":
+                    for s in extract_sources(event.get("data", {}).get("output")):
+                        if s not in sources:
+                            sources.append(s)
                 elif kind == "on_chat_model_stream":
                     chunk = event["data"]["chunk"]
                     if getattr(chunk, "tool_call_chunks", None):
@@ -158,6 +179,10 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
             yield sse({"error": "답변을 정리하지 못했습니다. 질문을 조금 더 구체적으로 나눠서 다시 물어봐 주세요."})
         except Exception as e:
             yield sse({"error": str(e)})
+        # 답변이 끝난 뒤 한 번만 보낸다. 검색은 됐지만 답변에 쓰이지 않은 자료도
+        # 포함되므로, 프론트에서는 '이 답변의 근거'가 아니라 '검색한 자료'로 표시한다.
+        if sources:
+            yield sse({"sources": sources})
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream", headers={

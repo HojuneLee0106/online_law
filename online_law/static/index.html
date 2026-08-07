@@ -10,7 +10,9 @@
       --bg: #f4f5f7; --panel: #ffffff; --sidebar: #1f2430;
       --sidebar-hover: #2b3140; --sidebar-active: #3355dd;
       --line: #e3e6ea; --text: #1c2024; --muted: #6b7280;
-      --accent: #3355dd; --user-bubble: #3355dd; --bot-bubble: #eef0f3; --danger: #d33;
+      /* 답변 말풍선은 페이지 배경(--bg)과 확실히 구분되어야 한다.
+         이전 값 #eef0f3 은 배경 #f4f5f7 과 거의 같아 경계가 안 보였다. */
+      --accent: #3355dd; --user-bubble: #3355dd; --bot-bubble: #ffffff; --danger: #d33;
     }
     html, body { height: 100%; }
     body {
@@ -66,7 +68,24 @@
       white-space: pre-wrap; word-break: break-word; }
     .msg.user { justify-content: flex-end; }
     .msg.user .bubble { background: var(--user-bubble); color: #fff; border-bottom-right-radius: 4px; max-width: 75%; }
-    .msg.bot .bubble { background: var(--bot-bubble); color: var(--text); border-bottom-left-radius: 4px; max-width: 85%; }
+    .msg.bot .bubble { background: var(--bot-bubble); color: var(--text); border-bottom-left-radius: 4px;
+      max-width: 85%; border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+    /* 마크다운으로 렌더한 답변. pre-wrap 을 끄지 않으면 블록 사이 줄바꿈이 이중으로 벌어진다 */
+    .bubble.md { white-space: normal; }
+    .bubble.md .md-body > *:first-child { margin-top: 0; }
+    .bubble.md .md-body > *:last-child { margin-bottom: 0; }
+    .bubble.md p { margin: 0 0 10px; }
+    .bubble.md h3, .bubble.md h4, .bubble.md h5 { margin: 14px 0 6px; font-size: 15px; font-weight: 700; }
+    .bubble.md ul, .bubble.md ol { margin: 0 0 10px; padding-left: 20px; }
+    .bubble.md li { margin: 3px 0; }
+    .bubble.md strong { font-weight: 700; }
+    .bubble.md code { background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+    .sources { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .sources summary { cursor: pointer; color: var(--muted); font-size: 13px; user-select: none; }
+    .sources summary:hover { color: var(--accent); }
+    .sources ul { margin: 8px 0 0; padding-left: 18px; }
+    .sources li { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 3px 0;
+      white-space: normal; word-break: break-word; }
     .msg.bot .bubble.pending::after { content: "▋"; animation: blink 1s steps(2) infinite; color: var(--muted); }
     @keyframes blink { 0%,50%{opacity:1;} 50.01%,100%{opacity:0;} }
     .msg.bot .bubble.status { color: var(--muted); font-style: italic; }
@@ -243,13 +262,85 @@
     }
     document.getElementById("newChat").onclick = startNewChat;
 
+    // 답변은 마크다운으로 온다(**굵게**, ## 제목, - 목록). 모델이 만든 문자열이므로
+    // 반드시 먼저 이스케이프한 뒤에 우리가 만든 태그만 끼워 넣는다.
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, (c) => (
+        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function renderMarkdown(src) {
+      const inline = (t) => t
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>");
+      const out = [];
+      let list = null;
+      const closeList = () => { if (list) { out.push("</" + list + ">"); list = null; } };
+      for (const raw of escapeHtml(src).split("\n")) {
+        const line = raw.trim();
+        if (!line) { closeList(); continue; }
+        let m;
+        if ((m = line.match(/^(#{1,4})\s+(.*)$/))) {
+          closeList();
+          const lvl = Math.min(m[1].length + 2, 5);
+          out.push(`<h${lvl}>${inline(m[2])}</h${lvl}>`);
+        } else if ((m = line.match(/^[-*]\s+(.*)$/))) {
+          if (list !== "ul") { closeList(); out.push("<ul>"); list = "ul"; }
+          out.push(`<li>${inline(m[1])}</li>`);
+        } else if ((m = line.match(/^\d+\.\s+(.*)$/))) {
+          if (list !== "ol") { closeList(); out.push("<ol>"); list = "ol"; }
+          out.push(`<li>${inline(m[1])}</li>`);
+        } else {
+          closeList();
+          out.push(`<p>${inline(line)}</p>`);
+        }
+      }
+      closeList();
+      return out.join("");
+    }
+    // 답변 말풍선에 본문을 채운다. 사용자 입력은 마크다운으로 해석하지 않는다.
+    // 본문을 .md-body 안에 두는 이유: 토큰이 올 때마다 다시 그리는데,
+    // 말풍선을 통째로 덮으면 뒤에 붙인 '검색한 자료'가 지워진다.
+    function setAnswer(bubble, text) {
+      bubble.classList.add("md");
+      let body = bubble.querySelector(".md-body");
+      if (!body) {
+        bubble.textContent = "";
+        body = document.createElement("div");
+        body.className = "md-body";
+        bubble.appendChild(body);
+      }
+      body.innerHTML = renderMarkdown(text);
+    }
+    // 검색한 자료 목록. 답변에 인용되지 않은 것도 들어 있으므로
+    // '근거'가 아니라 '검색한 자료'라고 부른다.
+    function setSources(bubble, list) {
+      if (!list || !list.length) return;
+      bubble.querySelector(".sources")?.remove();
+      const box = document.createElement("details");
+      box.className = "sources";
+      const sum = document.createElement("summary");
+      sum.textContent = `검색한 자료 ${list.length}건`;
+      box.appendChild(sum);
+      const ul = document.createElement("ul");
+      for (const s of list) {
+        const li = document.createElement("li");
+        li.textContent = s;            // 서버 문자열이므로 textContent 로만 넣는다
+        ul.appendChild(li);
+      }
+      box.appendChild(ul);
+      bubble.appendChild(box);
+    }
+
     function addMsg(role, text) {
       const hint = chat.querySelector(".empty-hint");
       if (hint) hint.remove();
       const wrap = document.createElement("div");
       wrap.className = "msg " + role;
       const bubble = document.createElement("div");
-      bubble.className = "bubble"; bubble.textContent = text;
+      bubble.className = "bubble";
+      if (role === "bot" && text) setAnswer(bubble, text);
+      else bubble.textContent = text;
       wrap.appendChild(bubble); chat.appendChild(wrap);
       chat.scrollTop = chat.scrollHeight;
       return bubble;
@@ -276,6 +367,7 @@
         // 도구가 아직 안 돌았으면 일반 안내를 보여준다(빈 말풍선 방지)
         const renderStatus = () => {
           botBubble.classList.add("status");
+          botBubble.classList.remove("md");
           botBubble.innerHTML = "";
           botBubble.append(statuses.size ? [...statuses].join(" · ") : "질문을 살펴보는 중입니다");
           const d = document.createElement("span");
@@ -304,12 +396,13 @@
               if (obj.status && !answer) { statuses.add(obj.status); renderStatus(); }
               if (obj.token) {
                 if (!answer) { statuses.clear(); botBubble.classList.remove("status"); botBubble.textContent = ""; }
-                answer += obj.token; botBubble.textContent = answer; chat.scrollTop = chat.scrollHeight;
+                answer += obj.token; setAnswer(botBubble, answer); chat.scrollTop = chat.scrollHeight;
               }
               if (obj.error) {
                 botBubble.classList.remove("status");
-                answer += "\n[오류] " + obj.error; botBubble.textContent = answer;
+                answer += "\n[오류] " + obj.error; setAnswer(botBubble, answer);
               }
+              if (obj.sources) setSources(botBubble, obj.sources);
             } catch (_) {}
           }
         }
