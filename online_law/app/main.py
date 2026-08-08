@@ -31,19 +31,29 @@ TOOL_STATUS = {
     "search_qa": "생활법령 자료를 확인하는 중입니다",
 }
 
-# 도구가 돌려준 검색 결과에서 출처 줄만 뽑는다.
+# 도구가 돌려준 검색 결과를 (출처, 본문) 쌍으로 쪼갠다.
 # 이 자료는 이미 모델 컨텍스트에 들어가 있으므로 화면에 함께 보여주는 데
 # 추가 토큰이 들지 않는다. 답변 본문에 조문이 인용되지 않은 경우에도
-# 사용자가 무엇을 근거로 답했는지 확인할 수 있다.
+# 사용자가 무엇을 근거로 답했는지 원문으로 확인할 수 있다.
 SOURCE_RE = re.compile(r"\[출처: ([^\]]+)\]")
+# 청킹 상한이 1,000자이지만 만일을 대비해 잘라 보낸다
+DOC_MAX_CHARS = 1600
 
 
-def extract_sources(output) -> list[str]:
+def extract_sources(output) -> list[dict]:
     if isinstance(output, str):
         text = output
     else:
         text = content_to_text(getattr(output, "content", "")) or str(output)
-    return SOURCE_RE.findall(text)
+    # split 결과: [앞부분, 출처1, 본문1, 출처2, 본문2, ...]
+    parts = SOURCE_RE.split(text)
+    docs = []
+    for i in range(1, len(parts) - 1, 2):
+        docs.append({
+            "source": parts[i].strip(),
+            "content": parts[i + 1].strip()[:DOC_MAX_CHARS],
+        })
+    return docs
 
 
 def content_to_text(content)->str:
@@ -134,7 +144,8 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
         # 이번 LLM 턴에서 사용자에게 이미 내보낸 토큰이 있는지.
         # 도구 호출 턴으로 판명되면 reset을 보내 프론트에서 폐기하게 한다.
         sent_in_turn = False
-        sources: list[str] = []           # 검색한 자료 (중복 없이, 순서 유지)
+        sources: list[dict] = []          # 검색한 자료 (출처 기준 중복 제거, 순서 유지)
+        seen_sources: set[str] = set()
         try:
             async for event in app.state.rag_graph.astream_events(
                 {"messages": [HumanMessage(content=req.question)]},
@@ -157,9 +168,10 @@ async def query_stream(req: QueryRequest, user_id: int = Depends(get_current_use
                     if label:
                         yield sse({"status": label})
                 elif kind == "on_tool_end":
-                    for s in extract_sources(event.get("data", {}).get("output")):
-                        if s not in sources:
-                            sources.append(s)
+                    for doc in extract_sources(event.get("data", {}).get("output")):
+                        if doc["source"] not in seen_sources:
+                            seen_sources.add(doc["source"])
+                            sources.append(doc)
                 elif kind == "on_chat_model_stream":
                     chunk = event["data"]["chunk"]
                     if getattr(chunk, "tool_call_chunks", None):

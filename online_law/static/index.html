@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>생활법령 상담</title>
+  <title>법대로</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #f4f5f7; --panel: #ffffff; --sidebar: #1f2430;
-      --sidebar-hover: #2b3140; --sidebar-active: #3355dd;
-      --line: #e3e6ea; --text: #1c2024; --muted: #6b7280;
+      /* 브라운 계열. 회색빛 배경 대신 따뜻한 톤으로 맞춘다 */
+      --bg: #f7f4f0; --panel: #ffffff; --sidebar: #2b2118;
+      --sidebar-hover: #3a2d22; --sidebar-active: #8b5e3c;
+      --line: #e6ded5; --text: #241d17; --muted: #7b6b5e;
       /* 답변 말풍선은 페이지 배경(--bg)과 확실히 구분되어야 한다.
          이전 값 #eef0f3 은 배경 #f4f5f7 과 거의 같아 경계가 안 보였다. */
-      --accent: #3355dd; --user-bubble: #3355dd; --bot-bubble: #ffffff; --danger: #d33;
+      --accent: #8b5e3c; --user-bubble: #8b5e3c; --bot-bubble: #ffffff; --danger: #b0413a;
     }
     html, body { height: 100%; }
     body {
@@ -83,9 +84,29 @@
     .sources { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
     .sources summary { cursor: pointer; color: var(--muted); font-size: 13px; user-select: none; }
     .sources summary:hover { color: var(--accent); }
-    .sources ul { margin: 8px 0 0; padding-left: 18px; }
-    .sources li { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 3px 0;
-      white-space: normal; word-break: break-word; }
+    .sources ul { margin: 8px 0 0; padding-left: 0; list-style: none; }
+    .sources li { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 2px 0;
+      white-space: normal; word-break: break-word; cursor: pointer;
+      padding: 4px 8px; border-radius: 6px; border: 1px solid transparent; }
+    .sources li:hover, .sources li.active {
+      background: #f3ece4; border-color: var(--line); color: var(--text); }
+
+    /* 오른쪽 원문 패널. 검색된 자료의 본문을 그대로 보여준다 */
+    #docPanel { width: 360px; flex-shrink: 0; background: var(--panel);
+      border-left: 1px solid var(--line); display: none; flex-direction: column; }
+    #docPanel.open { display: flex; }
+    #docPanel .head { padding: 14px 16px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    #docPanel .head strong { font-size: 14px; }
+    #docPanel .head .close { margin-left: auto; cursor: pointer; color: var(--muted);
+      font-size: 18px; line-height: 1; padding: 0 4px; }
+    #docPanel .head .close:hover { color: var(--text); }
+    #docTitle { padding: 12px 16px 0; font-size: 13px; font-weight: 700; color: var(--accent);
+      word-break: break-word; }
+    #docBody { padding: 8px 16px 20px; overflow-y: auto; font-size: 13px; line-height: 1.7;
+      white-space: pre-wrap; word-break: break-word; color: var(--text); flex: 1; }
+    #docHint { padding: 16px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 1100px) { #docPanel.open { display: none; } }
     .msg.bot .bubble.pending::after { content: "▋"; animation: blink 1s steps(2) infinite; color: var(--muted); }
     @keyframes blink { 0%,50%{opacity:1;} 50.01%,100%{opacity:0;} }
     .msg.bot .bubble.status { color: var(--muted); font-style: italic; }
@@ -107,8 +128,8 @@
 <body>
   <div id="auth">
     <div class="card">
-      <h1>⚖️ 생활법령 상담</h1>
-      <div class="tagline">법조문·판례와 생활법령 상담을 도와드립니다.</div>
+      <h1>⚖️ 법대로</h1>
+      <div class="tagline">법조문·판례와 생활법령을 근거로 답해 드립니다.</div>
       <label for="au">아이디</label>
       <input id="au" autocomplete="username" />
       <label for="ap">비밀번호</label>
@@ -130,7 +151,7 @@
   </aside>
   <div id="main">
     <header>
-      <h2>생활법령 상담</h2>
+      <h2>법대로</h2>
       <div class="sub">예: "재혼 후 자녀 성을 바꿀 수 있나요?" / "음주운전 처벌 기준은?"</div>
     </header>
     <div id="chat"><div class="empty-hint" id="emptyHint">새 대화를 시작하세요.</div></div>
@@ -141,6 +162,12 @@
       </div>
     </footer>
   </div>
+  <aside id="docPanel">
+    <div class="head"><strong>검색한 자료</strong><span class="close" id="docClose">×</span></div>
+    <div id="docTitle"></div>
+    <div id="docBody"></div>
+    <div id="docHint">목록에서 자료를 올려놓거나 클릭하면 원문이 보입니다.</div>
+  </aside>
   <script>
     const API = "";
     let mode = "login";
@@ -312,6 +339,25 @@
       }
       body.innerHTML = renderMarkdown(text);
     }
+    // 오른쪽 원문 패널
+    const docPanel = document.getElementById("docPanel");
+    const docTitle = document.getElementById("docTitle");
+    const docBody = document.getElementById("docBody");
+    const docHint = document.getElementById("docHint");
+    document.getElementById("docClose").onclick = () => docPanel.classList.remove("open");
+
+    function showDoc(doc, li) {
+      docPanel.classList.add("open");
+      docHint.style.display = "none";
+      docTitle.textContent = doc.source;     // 서버 문자열이므로 textContent 로만
+      docBody.textContent = doc.content || "(본문이 없습니다)";
+      docBody.scrollTop = 0;
+      if (li) {
+        li.parentElement.querySelectorAll("li.active").forEach((x) => x.classList.remove("active"));
+        li.classList.add("active");
+      }
+    }
+
     // 검색한 자료 목록. 답변에 인용되지 않은 것도 들어 있으므로
     // '근거'가 아니라 '검색한 자료'라고 부른다.
     function setSources(bubble, list) {
@@ -319,17 +365,22 @@
       bubble.querySelector(".sources")?.remove();
       const box = document.createElement("details");
       box.className = "sources";
+      box.open = true;
       const sum = document.createElement("summary");
       sum.textContent = `검색한 자료 ${list.length}건`;
       box.appendChild(sum);
       const ul = document.createElement("ul");
-      for (const s of list) {
+      for (const doc of list) {
         const li = document.createElement("li");
-        li.textContent = s;            // 서버 문자열이므로 textContent 로만 넣는다
+        li.textContent = doc.source;
+        li.onmouseenter = () => showDoc(doc, li);
+        li.onclick = () => showDoc(doc, li);
         ul.appendChild(li);
       }
       box.appendChild(ul);
       bubble.appendChild(box);
+      // 답변이 끝나면 첫 자료를 오른쪽에 자동으로 띄워 둔다
+      showDoc(list[0], ul.firstChild);
     }
 
     function addMsg(role, text) {
