@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>법대로</title>
+  <title>법대로 — 생활법률 상담</title>
+  <meta name="description" content="법조문·판례·생활법령을 근거로 답하는 생활법률 상담" />
+  <!-- 저울 아이콘. 외부 파일 없이 data URI 로 넣어 주소창에서도 법률 사이트임이 보이게 한다.
+       (# 은 %23 으로 인코딩해야 한다) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%238b5e3c'/><g stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'><path d='M12 5.5v13'/><path d='M8.5 18.5h7'/><path d='M4.5 8h15'/></g><circle cx='12' cy='5' r='1.4' fill='%23fff'/><path d='M4.5 8 2 13.2h5z' fill='%23fff'/><path d='M19.5 8 17 13.2h5z' fill='%23fff'/></svg>" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -25,8 +29,11 @@
       align-items: center; justify-content: center; z-index: 20; }
     #auth .card { background: #fff; padding: 36px 32px; border-radius: 16px; width: 340px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid var(--line); }
-    #auth h1 { font-size: 20px; margin-bottom: 4px; }
-    #auth .tagline { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    #auth .brand { flex-direction: column; gap: 12px; text-align: center; margin-bottom: 6px; }
+    #auth .brand .mark { width: 52px; height: 52px; border-radius: 14px; }
+    #auth .brand .mark svg { width: 32px; height: 32px; }
+    #auth h1 { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+    #auth .tagline { font-size: 13px; color: var(--muted); margin-bottom: 22px; text-align: center; }
     #auth label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
     #auth input { width: 100%; border: 1px solid var(--line); border-radius: 10px;
       padding: 11px 13px; font-size: 15px; outline: none; }
@@ -61,8 +68,14 @@
     #sidebar .bottom a:hover { color: #fff; }
     #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
     header { padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--line); flex-shrink: 0; }
-    header h2 { font-size: 16px; }
-    header .sub { font-size: 12px; color: var(--muted); }
+    header .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    /* 로고 + 서비스명. 이전에는 16px 제목만 있어 무엇을 쓰는 화면인지 눈에 띄지 않았다 */
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand .mark { width: 34px; height: 34px; border-radius: 9px; background: var(--accent);
+      color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+    .brand .mark svg { width: 21px; height: 21px; }
+    .brand h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; }
+    .brand .dot { color: var(--accent); }
     #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
     .msg { display: flex; max-width: 780px; width: 100%; margin: 0 auto; }
     .msg .bubble { padding: 12px 16px; border-radius: 14px; font-size: 15px; line-height: 1.6;
@@ -128,7 +141,18 @@
 <body>
   <div id="auth">
     <div class="card">
-      <h1>⚖️ 법대로</h1>
+      <div class="brand">
+        <span class="mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5.5v13" /><path d="M8.5 18.5h7" /><path d="M4.5 8h15" />
+            <circle cx="12" cy="5" r="1.3" fill="currentColor" stroke="none" />
+            <path d="M4.5 8 2 13.2h5z" fill="currentColor" stroke="none" />
+            <path d="M19.5 8 17 13.2h5z" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <h1>법대로</h1>
+      </div>
       <div class="tagline">법조문·판례와 생활법령을 근거로 답해 드립니다.</div>
       <label for="au">아이디</label>
       <input id="au" autocomplete="username" />
@@ -151,8 +175,21 @@
   </aside>
   <div id="main">
     <header>
-      <h2>법대로</h2>
-      <div class="sub">예: "재혼 후 자녀 성을 바꿀 수 있나요?" / "음주운전 처벌 기준은?"</div>
+      <div class="brand">
+        <span class="mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5.5v13" /><path d="M8.5 18.5h7" /><path d="M4.5 8h15" />
+            <circle cx="12" cy="5" r="1.3" fill="currentColor" stroke="none" />
+            <path d="M4.5 8 2 13.2h5z" fill="currentColor" stroke="none" />
+            <path d="M19.5 8 17 13.2h5z" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <div>
+          <h2>법대로</h2>
+          <div class="sub">법조문 · 판례 · 생활법령을 근거로 답해 드립니다</div>
+        </div>
+      </div>
     </header>
     <div id="chat"><div class="empty-hint" id="emptyHint">새 대화를 시작하세요.</div></div>
     <footer>
